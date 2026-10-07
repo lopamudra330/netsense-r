@@ -338,6 +338,183 @@ unchanged under the parameter freeze and will be discussed as limitations.
   throughput is clipped to a near-constant value with no counter noise. For this reason
   the frozen-value rule (O2) is restricted to probe-based latency and jitter.
 
+## 11. Experiment 1: network behaviour (method and pre-recorded expectations)
+
+This section was written **before** Experiment 1 was run. Results are added below it only
+after review, and are compared against these expectations without changing anything.
+
+### 11.1 Data
+
+- Pipeline: generate → Telemetry Integrity & Validation Layer → **validated telemetry**.
+  The run stops if the validation status is FAIL.
+- **Training episodes only.** The episode-level split
+  ([`netsense/splits.py`](../netsense/splits.py)) is created here and then frozen and reused
+  by Experiments 1–4. It is stratified by episode type and cause, takes exactly half of
+  each group (40/40 stable, 30/30 worsening per cause, 15/15 recovering per cause), and
+  uses its own random stream (seed + 2000). No test episode enters Experiment 1.
+- Main tables and figures use seed 42. Headline values are repeated for all five seeds.
+- In any analysis spanning more than one seed, an episode is identified by
+  **(seed, episode_id)**, never by `episode_id` alone.
+
+### 11.2 Analyses
+
+1. **Distributions** of the six metrics by state and cause (Figure 2), plus a summary table
+   (mean, standard deviation, median, 25th/75th percentiles and, for packet loss, the
+   share of minutes with any loss; medians of loss are distorted by the 1/600 probe
+   resolution).
+2. **Separability** of EARLY_DEGRADATION and DEGRADED from NORMAL, per cause and metric:
+   - *Outside-reference share*: % of minutes outside the **empirical NORMAL reference
+     range**, the 1st–99th percentile of NORMAL minutes. If a state looked identical to
+     NORMAL, about 2% would fall outside by chance. This range was fixed before running
+     as a simple descriptive comparison. **It is not an engineering or operational alarm
+     threshold and will not be presented as one.**
+   - *Standardised difference*: (state mean − NORMAL mean) ÷ NORMAL standard deviation.
+   - Each is computed **pooled** (NORMAL minutes of all links together) and
+     **relative to each link's own baseline** (each value ÷ the median of that episode's
+     first 60 minutes). The baseline view is possible only because, in this controlled
+     simulation, every episode is healthy for at least its first 60 minutes. Real systems
+     do not provide a perfectly labelled healthy first hour, so later detectors will use
+     rolling recent-history baselines where appropriate.
+3. **Spearman correlation** (correlation of ranks) between the six metrics, separately per
+   cause (Figure 3). It is read as descriptive evidence of overlapping information between
+   variables. It is not causal and is not, on its own, a reason to remove a feature.
+4. **Rising phase: recovering vs worsening** (Figure 4). The question: *before the
+   trajectories diverge, is there observable telemetry evidence of whether degradation
+   will recover or continue towards severe degradation?*
+   - Shared rising window: from onset to the first minute hidden severity reaches 0.25,
+     the lowest possible recovery peak. Every episode of both types passes through this
+     window before diverging. Hidden severity defines the window for analysis only.
+   - One summary per episode: the baseline-relative **level** (median over the last 10
+     minutes of the window) and **rise speed** (change in level per minute across the
+     window), for each metric.
+   - Comparison: **probability of superiority**, the chance that a randomly chosen
+     worsening episode has a higher value than a randomly chosen recovering one
+     (0.5 = no difference). Training episodes of all five seeds are pooled (75 recovering
+     and 150 worsening per cause), with the range across seeds also reported.
+   - No classifier is trained and no hypothesis test is used.
+
+### 11.3 Expectations recorded before running
+
+| Item | Expectation |
+|---|---|
+| Congestion, EARLY vs NORMAL | Latency, jitter and throughput rise modestly; large overlap in the pooled view; error rate unchanged |
+| Congestion, DEGRADED vs NORMAL | Latency and jitter clearly separated; loss still mostly overlapping |
+| Link quality, EARLY vs NORMAL | Error rate rises in relative terms, but the pooled overlap is large because absolute values stay tiny; latency and throughput nearly unchanged |
+| Link quality, DEGRADED vs NORMAL | Error rate clearly separated; loss and retransmissions starting to separate; jitter rising slightly |
+| Pooled vs baseline-relative | Separation is stronger in the baseline-relative view than in the pooled view |
+| Packet loss | About half of NORMAL minutes contain at least one lost probe (background loss with 0.17% resolution), so loss is weak evidence until demand exceeds capacity or errors become large |
+| Correlation, congestion | Latency, jitter and throughput strongly positively related; error rate largely unrelated to the others |
+| Correlation, link quality | Error rate, loss and retransmissions strongly positively related; throughput negatively related to them |
+| Rising phase | Probability of superiority close to 0.5 for every metric and both causes, because both episode types rise through the same process. A value far from 0.5 would suggest a simulator asymmetry, to be investigated and reported, not tuned |
+| Across seeds | The same qualitative conclusions for all five seeds |
+
+### 11.4 Observed results (added after the run; section 11.3 left unchanged)
+
+Training episodes only: 650 across five seeds (130 per seed), each identified by
+(seed, episode_id). No test episode entered the analysis. The validation status was WARN
+for every seed, caused only by O3. Runtime was about 23 s. Outputs:
+`results/metrics/e1_*.csv` and Figures 2–4 in `results/figures/`.
+
+**Implementation decisions made before any result existed:**
+- A ratio to a baseline of 0 is undefined. Baseline-relative packet loss therefore exists only
+  for episodes with non-zero first-hour median loss (34% of NORMAL minutes in seed 42).
+- The NORMAL reference uses every NORMAL minute, stable episodes included.
+- Episodes that never reach severity 0.25 are excluded from the rising-phase comparison.
+  None were.
+
+**Separability from NORMAL.** Shown as % of minutes outside the empirical NORMAL reference
+range, pooled view, minimum–maximum over five seeds. About 2% is expected by chance.
+
+| Cause | Metric | EARLY_DEGRADATION | DEGRADED |
+|---|---|---|---|
+| Congestion | Latency | 4.6–7.6 | 40.3–47.7 |
+| Congestion | Jitter | 4.6–7.1 | 41.8–47.0 |
+| Congestion | Packet loss | 3.0–3.8 | 12.1–16.4 |
+| Congestion | Retransmissions | 4.0–5.9 | 13.8–18.2 |
+| Congestion | Throughput | 4.5–7.2 | 42.6–47.4 |
+| Congestion | Error rate | 1.4–3.3 | 1.6–2.9 |
+| Link quality | Error rate | 4.7–18.1 | 83.6–98.0 |
+| Link quality | Retransmissions | 3.8–12.4 | 77.2–94.3 |
+| Link quality | Packet loss | 3.3–4.2 | 46.3–54.2 |
+| Link quality | Latency / jitter / throughput | 1.6–6.0 | 1.1–5.4 |
+
+The baseline-relative view gave similar values, with differences in both directions
+(seed 42, DEGRADED: congestion jitter 50.2 vs 44.2 pooled; congestion throughput 34.4 vs
+44.6; link-quality loss 44.5 vs 51.2).
+
+**Packet loss.** Minutes with at least one lost probe: NORMAL 47–48% for both causes;
+EARLY 51% (congestion) and 63% (link quality); DEGRADED 55% and 94%; SEVERE 99.5% and 100%.
+
+**Spearman correlation (seed 42).**
+- Congestion: jitter–throughput 0.95, latency–throughput 0.82, latency–jitter 0.81,
+  loss–retransmissions 0.74; error rate ≤ 0.08 with every other metric.
+- Link quality: error rate–retransmissions 0.90, loss with error rate and with
+  retransmissions 0.84, jitter with these 0.68–0.69; throughput −0.29 to −0.30.
+
+**Rising phase.** Probability of superiority across 24 comparisons (six metrics × two
+measures × two causes) ranged from 0.43 to 0.59 with five seeds pooled. For **every**
+comparison the per-seed range spans 0.5, so no direction is consistent between seeds.
+Values at least 0.05 from 0.5:
+- congestion latency level 0.43; congestion throughput speed 0.55;
+- link-quality latency level 0.56, jitter level 0.58, loss level 0.59 (on 61 vs 31 episodes
+  where the loss ratio is defined), retransmissions level and speed 0.55.
+
+No significance tests were used. By the end of the rising window, degradation itself is
+visible: for example, congestion jitter is about 2× and link error rate about 5.8× the
+episode's own baseline.
+
+### 11.5 Expectations compared with observations
+
+| Pre-recorded expectation (11.3) | Observed | Verdict |
+|---|---|---|
+| Congestion EARLY: modest rise in latency, jitter, throughput; large pooled overlap; error rate unchanged | 5–8% outside reference; error rate at chance | Matches |
+| Congestion DEGRADED: latency and jitter clearly separated; loss mostly overlapping | Latency and jitter about 40–56% outside; loss 11–20% | Partly: about half still overlaps |
+| Link EARLY: error rate rises relatively; large pooled overlap; latency and throughput unchanged | Median error rate about 7× NORMAL, yet 82–95% of minutes inside the reference range | Matches |
+| Link DEGRADED: error rate clear; loss and retransmissions starting to separate; jitter slightly up | Error rate 84–99%; retransmissions 77–95%; loss 34–54%; jitter 1.2–1.6% | Partly: retransmissions stronger than expected; jitter does not separate |
+| Baseline view separates better than pooled | Small differences in both directions | Does not match |
+| About half of NORMAL minutes contain loss | 47–48% | Matches |
+| Congestion correlations | As expected | Matches |
+| Link correlations: throughput negatively related | Weakly (−0.29 to −0.30) | Partly |
+| Rising phase close to 0.5 | 0.43–0.59; every per-seed range spans 0.5 | Matches |
+| Same conclusions across seeds | Yes; large seed spread for link EARLY error rate (4.7–18.1%) | Matches |
+
+The mismatches are kept as findings. The expectations were not rewritten.
+
+### 11.6 Interpretation
+
+All statements describe the frozen synthetic environment, not real networks.
+
+1. **EARLY degradation overlaps strongly with NORMAL at individual-minute level.** At most
+   about 18% of early-degradation minutes (link-quality error rate) and about 8% (congestion
+   latency and jitter) fall outside the empirical NORMAL reference range.
+2. **Per-link baseline normalisation did not materially improve separation and sometimes
+   reduced it.** Overlap seems to be driven mainly by minute-to-minute variation (traffic
+   variation, harmless bursts, measurement noise) rather than by differences between links.
+3. **Hypothesis for later experiments, not an established finding:** within-link temporal
+   variation and persistence (for example rolling windows) may matter more than static
+   per-link calibration.
+4. **Recovering and worsening episodes show no consistent separation during their shared
+   rising phase.** This supports *degradation detection ≠ prognosis*. Prognosis remains
+   future research.
+5. **At 600 probes per minute, low packet-loss values are poor evidence of early
+   degradation.** About half of healthy minutes already lose at least one probe, and the
+   loss medians (0 or 0.17%) are a resolution artefact.
+6. **Correlation across the full operating range is not evidence that a variable is useful
+   for early detection.** Example: under link quality, jitter correlates 0.68 with error rate,
+   yet DEGRADED jitter is barely separable from NORMAL. The correlation comes mostly from
+   severe minutes.
+7. **Congestion and link-quality degradation show different telemetry relationships.**
+   Under congestion, delay, jitter and throughput move together and error rate is
+   unrelated. Under link quality, error rate, loss and retransmissions move together and
+   delay barely changes.
+
+Explanations of the mismatches (not changes): harmless traffic bursts widen the NORMAL jitter
+range, so the slight rise in link-quality DEGRADED jitter stays inside it. Retransmissions
+come from counters and avoid the 1/600 probe resolution that limits loss. The DEGRADED band
+for congestion includes utilisation that is not yet far outside the burst-widened normal
+range. Differences in normal load between links dominate throughput until link-quality
+degradation becomes severe.
+
 ## Change log
 
 | Date | Change | Reason |
@@ -348,3 +525,5 @@ unchanged under the parameter freeze and will be discussed as limitations.
 | 2026-10-08 | Corrected the expected telemetry behaviour: under congestion throughput rises to capacity and plateaus; under link-quality degradation average latency changes only slightly | The earlier expectation contradicted basic link behaviour. Corrected in the design before any data was generated |
 | 2026-10-08 | Synthetic telemetry model specified and generator parameters frozen | Required before detector development |
 | 2026-10-08 | Added the Telemetry Integrity & Validation Layer, deterministic defect injection into a copy, and manifest-based evaluation; recorded two simulator simplifications exposed by validation | Telemetry must be validated before detector development; the generator itself is unchanged |
+| 2026-10-08 | Added the frozen episode-level train/test split and the Experiment 1 method with expectations recorded before running | Exploratory analysis restricted to training episodes so that it cannot influence decisions about test data |
+| 2026-10-08 | Added Experiment 1 observed results, comparison with pre-recorded expectations and interpretation | Results reviewed; mismatches preserved as findings; no parameter, threshold or calculation changed |

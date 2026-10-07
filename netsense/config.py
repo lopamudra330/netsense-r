@@ -158,6 +158,18 @@ COUNTER_WRAP_MBPS = 2**32 * 8 / SAMPLE_INTERVAL_SECONDS / 1e6  # one 32-bit byte
 # --- Episode-level train/test split (frozen, reused by Experiments 1-4) ---
 SPLIT_SEED_OFFSET = 2000  # the split uses its own random stream: seed + offset
 
+# --- Experiment 1: descriptive behaviour analysis ---
+# Empirical NORMAL reference range: a descriptive comparison chosen before running,
+# NOT an engineering or operational alarm threshold.
+NORMAL_REFERENCE_PERCENTILES = (1, 99)
+# Per-link baseline: median of each episode's first minutes. Possible only because every
+# simulated episode is healthy for at least this long; real systems need rolling baselines.
+BASELINE_WINDOW_MIN = 60
+# Rising-phase comparison: the window ends where severity first reaches the lowest possible
+# recovery peak, so recovering and worsening episodes have not yet diverged.
+RISING_WINDOW_END_SEVERITY = RECOVERY_PEAK_RANGE[0]
+RISING_LEVEL_WINDOW_MIN = 10  # "level" = median of the last minutes of the rising window
+
 # --- Paths ------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GENERATED_DATA_DIR = PROJECT_ROOT / "data" / "generated"
