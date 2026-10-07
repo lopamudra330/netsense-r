@@ -1,0 +1,14 @@
+# Generated telemetry is reproducible from the fixed seed, so it is not committed.
+data/generated/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
