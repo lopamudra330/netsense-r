@@ -1,0 +1,5 @@
+state,minutes,flagged_unusual,share_flagged_pct,share_of_all_unusual_pct
+NORMAL,56547,1372,2.4,4.5
+EARLY_DEGRADATION,8952,2955,33.0,9.6
+DEGRADED,6078,4278,70.4,14.0
+SEVERE_DEGRADATION,22023,22017,100.0,71.9

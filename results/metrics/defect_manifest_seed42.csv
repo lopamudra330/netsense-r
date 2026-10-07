@@ -1,0 +1,326 @@
+defect_id,defect_type,episode_id,minute_start,minute_end,field,original_value,injected_value,expected_check,detectable
+0,missing_value,195,321,321,throughput_mbps,30.342236203680702,nan,S2-telemetry,True
+1,missing_value,92,333,333,retransmission_rate_pct,0.10321658029226581,nan,S2-telemetry,True
+2,missing_value,1,293,293,packet_loss_pct,0.16666666666666669,nan,S2-telemetry,True
+3,missing_value,96,278,278,throughput_mbps,45.87355196463699,nan,S2-telemetry,True
+4,missing_value,35,28,28,latency_ms,15.133234897617866,nan,S2-telemetry,True
+5,missing_value,149,273,273,retransmission_rate_pct,20.8285275986606,nan,S2-telemetry,True
+6,missing_value,121,95,95,latency_ms,31.669443866020295,nan,S2-telemetry,True
+7,missing_value,194,87,87,throughput_mbps,55.6978452977224,nan,S2-telemetry,True
+8,missing_value,132,187,187,throughput_mbps,33.92947269772352,nan,S2-telemetry,True
+9,missing_value,116,27,27,throughput_mbps,32.93733720533386,nan,S2-telemetry,True
+10,missing_value,51,284,284,jitter_ms,1.2126171421983263,nan,S2-telemetry,True
+11,missing_value,139,14,14,jitter_ms,2.1340488391086954,nan,S2-telemetry,True
+12,missing_value,23,122,122,retransmission_rate_pct,0.1545468631880582,nan,S2-telemetry,True
+13,missing_value,156,233,233,packet_loss_pct,17.666666666666668,nan,S2-telemetry,True
+14,missing_value,193,67,67,retransmission_rate_pct,0.08545153086479756,nan,S2-telemetry,True
+15,missing_value,68,245,245,jitter_ms,35.43142343527126,nan,S2-telemetry,True
+16,missing_value,175,150,150,retransmission_rate_pct,0.08865702278975723,nan,S2-telemetry,True
+17,missing_value,3,292,292,jitter_ms,37.07609217490638,nan,S2-telemetry,True
+18,missing_value,94,230,230,error_rate_pct,0.01159503618842347,nan,S2-telemetry,True
+19,missing_value,60,83,83,retransmission_rate_pct,0.08595911682759219,nan,S2-telemetry,True
+20,missing_value,136,261,261,error_rate_pct,0.01710312063651892,nan,S2-telemetry,True
+21,missing_value,231,85,85,error_rate_pct,0.005088462184984928,nan,S2-telemetry,True
+22,missing_value,27,109,109,jitter_ms,1.260684105676307,nan,S2-telemetry,True
+23,missing_value,232,312,312,jitter_ms,9.910032631015268,nan,S2-telemetry,True
+24,missing_value,158,75,75,latency_ms,12.307195267756276,nan,S2-telemetry,True
+25,exact_duplicate,17,295,295,row,,duplicate row,I1,True
+26,exact_duplicate,105,18,18,row,,duplicate row,I1,True
+27,exact_duplicate,10,123,123,row,,duplicate row,I1,True
+28,exact_duplicate,220,300,300,row,,duplicate row,I1,True
+29,exact_duplicate,254,219,219,row,,duplicate row,I1,True
+30,exact_duplicate,157,235,235,row,,duplicate row,I1,True
+31,exact_duplicate,144,316,316,row,,duplicate row,I1,True
+32,exact_duplicate,123,43,43,row,,duplicate row,I1,True
+33,exact_duplicate,82,162,162,row,,duplicate row,I1,True
+34,exact_duplicate,185,250,250,row,,duplicate row,I1,True
+35,exact_duplicate,14,176,176,row,,duplicate row,I1,True
+36,exact_duplicate,224,180,180,row,,duplicate row,I1,True
+37,exact_duplicate,63,86,86,row,,duplicate row,I1,True
+38,exact_duplicate,43,234,234,row,,duplicate row,I1,True
+39,exact_duplicate,215,206,206,row,,duplicate row,I1,True
+40,exact_duplicate,50,156,156,row,,duplicate row,I1,True
+41,exact_duplicate,174,327,327,row,,duplicate row,I1,True
+42,exact_duplicate,133,262,262,row,,duplicate row,I1,True
+43,exact_duplicate,136,208,208,row,,duplicate row,I1,True
+44,exact_duplicate,26,60,60,row,,duplicate row,I1,True
+45,exact_duplicate,147,98,98,row,,duplicate row,I1,True
+46,exact_duplicate,203,329,329,row,,duplicate row,I1,True
+47,exact_duplicate,175,264,264,row,,duplicate row,I1,True
+48,exact_duplicate,115,164,164,row,,duplicate row,I1,True
+49,exact_duplicate,99,8,8,row,,duplicate row,I1,True
+50,conflicting_duplicate,211,54,54,latency_ms,23.78153997135623,26.159693968491858,I1,True
+51,conflicting_duplicate,110,167,167,latency_ms,22.714418334911635,24.9858601684028,I1,True
+52,conflicting_duplicate,235,306,306,latency_ms,34.40939296878196,37.85033226566016,I1,True
+53,conflicting_duplicate,80,151,151,latency_ms,19.740756121608108,21.71483173376892,I1,True
+54,conflicting_duplicate,176,226,226,latency_ms,88.33084623757738,97.16393086133512,I1,True
+55,conflicting_duplicate,143,96,96,latency_ms,32.34720809423671,35.58192890366039,I1,True
+56,conflicting_duplicate,69,102,102,latency_ms,16.228738741904575,17.851612616095036,I1,True
+57,conflicting_duplicate,185,150,150,latency_ms,25.946389873837788,28.54102886122157,I1,True
+58,conflicting_duplicate,131,180,180,latency_ms,28.726795947983202,31.599475542781526,I1,True
+59,conflicting_duplicate,13,245,245,latency_ms,28.93412313840024,31.827535452240266,I1,True
+60,conflicting_duplicate,85,119,119,latency_ms,26.7717185192992,29.448890371229123,I1,True
+61,conflicting_duplicate,11,114,114,latency_ms,28.592497426848997,31.4517471695339,I1,True
+62,conflicting_duplicate,178,128,128,latency_ms,19.059338669618153,20.96527253657997,I1,True
+63,conflicting_duplicate,187,217,217,latency_ms,23.58436413082108,25.94280054390319,I1,True
+64,conflicting_duplicate,165,341,341,latency_ms,32.38176475709701,35.61994123280672,I1,True
+65,conflicting_duplicate,221,193,193,latency_ms,15.857493575136374,17.443242932650012,I1,True
+66,conflicting_duplicate,247,315,315,latency_ms,22.43481534531167,24.67829687984284,I1,True
+67,conflicting_duplicate,104,156,156,latency_ms,23.775946462499398,26.15354110874934,I1,True
+68,conflicting_duplicate,39,311,311,latency_ms,21.06030712890456,23.16633784179502,I1,True
+69,conflicting_duplicate,201,188,188,latency_ms,30.402005363550778,33.44220589990586,I1,True
+70,conflicting_duplicate,148,53,53,latency_ms,21.768038299494112,23.944842129443526,I1,True
+71,conflicting_duplicate,54,338,338,latency_ms,31.17966584480587,34.29763242928646,I1,True
+72,conflicting_duplicate,49,306,306,latency_ms,29.23182808622872,32.15501089485159,I1,True
+73,conflicting_duplicate,113,338,338,latency_ms,21.087467975926387,23.196214773519028,I1,True
+74,conflicting_duplicate,62,318,318,latency_ms,23.674330431835372,26.04176347501891,I1,True
+75,negative_latency,54,303,303,latency_ms,30.836102090552874,-30.836102090552874,S4,True
+76,negative_latency,137,259,259,latency_ms,29.605912813126164,-29.605912813126164,S4,True
+77,negative_latency,211,307,307,latency_ms,29.962864250936004,-29.962864250936004,S4,True
+78,negative_latency,240,31,31,latency_ms,24.08914561396551,-24.08914561396551,S4,True
+79,negative_latency,208,259,259,latency_ms,26.311555278232643,-26.311555278232643,S4,True
+80,negative_latency,2,234,234,latency_ms,24.40701026566349,-24.40701026566349,S4,True
+81,negative_latency,186,267,267,latency_ms,32.24582817586371,-32.24582817586371,S4,True
+82,negative_latency,205,295,295,latency_ms,17.605136051011566,-17.605136051011566,S4,True
+83,negative_latency,84,132,132,latency_ms,47.46049813092487,-47.46049813092487,S4,True
+84,negative_latency,155,215,215,latency_ms,21.880215003632614,-21.880215003632614,S4,True
+85,negative_latency,194,132,132,latency_ms,24.377318290946913,-24.377318290946913,S4,True
+86,negative_latency,184,190,190,latency_ms,18.689832127478432,-18.689832127478432,S4,True
+87,negative_latency,192,188,188,latency_ms,26.88277883569805,-26.88277883569805,S4,True
+88,negative_latency,148,198,198,latency_ms,20.376143368829727,-20.376143368829727,S4,True
+89,negative_latency,210,283,283,latency_ms,23.61026730804633,-23.61026730804633,S4,True
+90,negative_latency,221,136,136,latency_ms,15.906691856902547,-15.906691856902547,S4,True
+91,negative_latency,72,335,335,latency_ms,27.616864100064937,-27.616864100064937,S4,True
+92,negative_latency,250,135,135,latency_ms,33.63134308135392,-33.63134308135392,S4,True
+93,negative_latency,90,317,317,latency_ms,13.798745658610509,-13.798745658610509,S4,True
+94,negative_latency,9,345,345,latency_ms,74.18478008850138,-74.18478008850138,S4,True
+95,negative_latency,247,67,67,latency_ms,22.729903389035687,-22.729903389035687,S4,True
+96,negative_latency,101,98,98,latency_ms,17.506274887350457,-17.506274887350457,S4,True
+97,negative_latency,78,258,258,latency_ms,26.31592587958462,-26.31592587958462,S4,True
+98,negative_latency,103,229,229,latency_ms,17.276350370949814,-17.276350370949814,S4,True
+99,negative_latency,71,259,259,latency_ms,18.93986592253776,-18.93986592253776,S4,True
+100,negative_throughput,131,141,141,throughput_mbps,44.72257718000202,-44.72257718000202,S4,True
+101,negative_throughput,175,294,294,throughput_mbps,54.95115907451092,-54.95115907451092,S4,True
+102,negative_throughput,173,344,344,throughput_mbps,27.116672477437195,-27.116672477437195,S4,True
+103,negative_throughput,148,110,110,throughput_mbps,52.94101465268447,-52.94101465268447,S4,True
+104,negative_throughput,11,19,19,throughput_mbps,48.46247155689016,-48.46247155689016,S4,True
+105,negative_throughput,37,28,28,throughput_mbps,40.96166252757025,-40.96166252757025,S4,True
+106,negative_throughput,247,214,214,throughput_mbps,30.24381353514804,-30.24381353514804,S4,True
+107,negative_throughput,8,178,178,throughput_mbps,48.696743590591005,-48.696743590591005,S4,True
+108,negative_throughput,248,142,142,throughput_mbps,48.57490517031877,-48.57490517031877,S4,True
+109,negative_throughput,162,187,187,throughput_mbps,99.89550053062796,-99.89550053062796,S4,True
+110,negative_throughput,241,243,243,throughput_mbps,36.67263627078697,-36.67263627078697,S4,True
+111,negative_throughput,51,53,53,throughput_mbps,36.59270760230485,-36.59270760230485,S4,True
+112,negative_throughput,19,204,204,throughput_mbps,32.89555229430242,-32.89555229430242,S4,True
+113,negative_throughput,127,187,187,throughput_mbps,46.094014216049686,-46.094014216049686,S4,True
+114,negative_throughput,53,351,351,throughput_mbps,44.08416863545966,-44.08416863545966,S4,True
+115,negative_throughput,101,130,130,throughput_mbps,79.09902608609164,-79.09902608609164,S4,True
+116,negative_throughput,2,335,335,throughput_mbps,35.11739713188551,-35.11739713188551,S4,True
+117,negative_throughput,108,234,234,throughput_mbps,57.35409702886838,-57.35409702886838,S4,True
+118,negative_throughput,98,251,251,throughput_mbps,54.0602389118646,-54.0602389118646,S4,True
+119,negative_throughput,148,38,38,throughput_mbps,51.99056935572619,-51.99056935572619,S4,True
+120,negative_throughput,194,306,306,throughput_mbps,53.55108954072445,-53.55108954072445,S4,True
+121,negative_throughput,114,344,344,throughput_mbps,38.52860970557359,-38.52860970557359,S4,True
+122,negative_throughput,170,211,211,throughput_mbps,53.66710121178514,-53.66710121178514,S4,True
+123,negative_throughput,227,352,352,throughput_mbps,26.619076812589032,-26.619076812589032,S4,True
+124,negative_throughput,9,219,219,throughput_mbps,99.89128012822438,-99.89128012822438,S4,True
+125,percent_over_100,187,306,306,packet_loss_pct,33.666666666666664,3366.6666666666665,S5,True
+126,percent_over_100,240,354,354,packet_loss_pct,13.0,1300.0,S5,True
+127,percent_over_100,88,272,272,packet_loss_pct,29.5,2950.0,S5,True
+128,percent_over_100,18,210,210,packet_loss_pct,25.666666666666664,2566.6666666666665,S5,True
+129,percent_over_100,150,145,145,packet_loss_pct,18.833333333333332,1883.3333333333333,S5,True
+130,percent_over_100,179,301,301,packet_loss_pct,26.5,2650.0,S5,True
+131,percent_over_100,154,296,296,packet_loss_pct,16.5,1650.0,S5,True
+132,percent_over_100,88,224,224,packet_loss_pct,5.0,500.0,S5,True
+133,percent_over_100,150,287,287,packet_loss_pct,23.5,2350.0,S5,True
+134,percent_over_100,145,346,346,packet_loss_pct,32.83333333333333,3283.333333333333,S5,True
+135,percent_over_100,106,245,245,packet_loss_pct,7.166666666666667,716.6666666666667,S5,True
+136,percent_over_100,4,284,284,packet_loss_pct,19.5,1950.0,S5,True
+137,percent_over_100,25,262,262,packet_loss_pct,28.999999999999996,2899.9999999999995,S5,True
+138,percent_over_100,220,198,198,packet_loss_pct,14.499999999999998,1449.9999999999998,S5,True
+139,percent_over_100,50,313,313,packet_loss_pct,18.0,1800.0,S5,True
+140,percent_over_100,258,272,272,packet_loss_pct,14.000000000000002,1400.0000000000002,S5,True
+141,percent_over_100,171,189,189,packet_loss_pct,21.833333333333332,2183.333333333333,S5,True
+142,percent_over_100,187,338,338,packet_loss_pct,30.333333333333336,3033.3333333333335,S5,True
+143,percent_over_100,37,282,282,packet_loss_pct,35.0,3500.0,S5,True
+144,percent_over_100,143,326,326,packet_loss_pct,18.5,1850.0,S5,True
+145,percent_over_100,123,321,321,packet_loss_pct,23.166666666666664,2316.6666666666665,S5,True
+146,percent_over_100,87,285,285,packet_loss_pct,25.5,2550.0,S5,True
+147,percent_over_100,124,201,201,packet_loss_pct,12.0,1200.0,S5,True
+148,percent_over_100,50,205,205,packet_loss_pct,12.333333333333334,1233.3333333333335,S5,True
+149,percent_over_100,239,210,210,packet_loss_pct,3.6666666666666665,366.66666666666663,S5,True
+150,throughput_over_capacity,225,313,313,throughput_mbps,97.27711109740663,669.93941723074,S6,True
+151,throughput_over_capacity,73,129,129,throughput_mbps,49.633563606893915,622.2958697402273,S6,True
+152,throughput_over_capacity,61,317,317,throughput_mbps,36.48169071807305,609.1439968514064,S6,True
+153,throughput_over_capacity,210,319,319,throughput_mbps,53.841884791138824,626.5041909244721,S6,True
+154,throughput_over_capacity,17,90,90,throughput_mbps,48.49941700516389,621.1617231384972,S6,True
+155,throughput_over_capacity,179,89,89,throughput_mbps,45.27820799507037,617.9405141284037,S6,True
+156,throughput_over_capacity,224,150,150,throughput_mbps,25.74043611527607,598.4027422486095,S6,True
+157,throughput_over_capacity,9,34,34,throughput_mbps,41.7281327304565,614.3904388637899,S6,True
+158,throughput_over_capacity,8,122,122,throughput_mbps,47.031471612075066,619.6937777454084,S6,True
+159,throughput_over_capacity,39,322,322,throughput_mbps,50.01910021152295,622.6814063448563,S6,True
+160,throughput_over_capacity,33,297,297,throughput_mbps,46.80113359605599,619.4634397293894,S6,True
+161,throughput_over_capacity,121,202,202,throughput_mbps,47.03425698548511,619.6965631188184,S6,True
+162,throughput_over_capacity,246,342,342,throughput_mbps,33.59660855308916,606.2589146864225,S6,True
+163,throughput_over_capacity,245,185,185,throughput_mbps,58.31669051692578,630.9789966502591,S6,True
+164,throughput_over_capacity,167,170,170,throughput_mbps,99.89278521794114,672.5550913512745,S6,True
+165,throughput_over_capacity,244,123,123,throughput_mbps,57.778247462644764,630.4405535959781,S6,True
+166,throughput_over_capacity,156,194,194,throughput_mbps,99.89327672555022,672.5555828588836,S6,True
+167,throughput_over_capacity,139,151,151,throughput_mbps,95.15651312725531,667.8188192605886,S6,True
+168,throughput_over_capacity,228,41,41,throughput_mbps,33.135296028059386,605.7976021613928,S6,True
+169,throughput_over_capacity,135,33,33,throughput_mbps,34.890251696555964,607.5525578298893,S6,True
+170,throughput_over_capacity,163,35,35,throughput_mbps,41.685617986167024,614.3479241195004,S6,True
+171,throughput_over_capacity,81,170,170,throughput_mbps,41.18685468667044,613.8491608200038,S6,True
+172,throughput_over_capacity,111,227,227,throughput_mbps,22.942026200126246,595.6043323334596,S6,True
+173,throughput_over_capacity,253,222,222,throughput_mbps,38.963183623578104,611.6254897569114,S6,True
+174,throughput_over_capacity,249,165,165,throughput_mbps,99.89088031092035,672.5531864442537,S6,True
+175,timestamp_gap,131,118,125,row,,7 minutes removed,C1,True
+176,timestamp_gap,130,130,139,row,,9 minutes removed,C1,True
+177,timestamp_gap,57,247,254,row,,7 minutes removed,C1,True
+178,timestamp_gap,131,247,255,row,,8 minutes removed,C1,True
+179,timestamp_gap,73,335,339,row,,4 minutes removed,C1,True
+180,timestamp_gap,58,341,348,row,,7 minutes removed,C1,True
+181,timestamp_gap,180,267,277,row,,10 minutes removed,C1,True
+182,timestamp_gap,133,126,130,row,,4 minutes removed,C1,True
+183,timestamp_gap,101,323,329,row,,6 minutes removed,C1,True
+184,timestamp_gap,157,148,157,row,,9 minutes removed,C1,True
+185,timestamp_gap,2,255,263,row,,8 minutes removed,C1,True
+186,timestamp_gap,81,114,121,row,,7 minutes removed,C1,True
+187,timestamp_gap,216,114,122,row,,8 minutes removed,C1,True
+188,timestamp_gap,251,232,242,row,,10 minutes removed,C1,True
+189,timestamp_gap,157,311,319,row,,8 minutes removed,C1,True
+190,timestamp_gap,162,206,210,row,,4 minutes removed,C1,True
+191,timestamp_gap,212,190,193,row,,3 minutes removed,C1,True
+192,timestamp_gap,240,283,288,row,,5 minutes removed,C1,True
+193,timestamp_gap,157,341,346,row,,5 minutes removed,C1,True
+194,timestamp_gap,14,245,255,row,,10 minutes removed,C1,True
+195,timestamp_gap,82,197,205,row,,8 minutes removed,C1,True
+196,timestamp_gap,221,295,298,row,,3 minutes removed,C1,True
+197,timestamp_gap,66,185,193,row,,8 minutes removed,C1,True
+198,timestamp_gap,139,298,307,row,,9 minutes removed,C1,True
+199,timestamp_gap,146,235,238,row,,3 minutes removed,C1,True
+200,out_of_sequence,192,36,37,row,,rows swapped,I3,True
+201,out_of_sequence,191,79,80,row,,rows swapped,I3,True
+202,out_of_sequence,71,41,42,row,,rows swapped,I3,True
+203,out_of_sequence,156,304,305,row,,rows swapped,I3,True
+204,out_of_sequence,98,35,36,row,,rows swapped,I3,True
+205,out_of_sequence,123,234,235,row,,rows swapped,I3,True
+206,out_of_sequence,145,65,66,row,,rows swapped,I3,True
+207,out_of_sequence,7,258,259,row,,rows swapped,I3,True
+208,out_of_sequence,138,351,352,row,,rows swapped,I3,True
+209,out_of_sequence,38,77,78,row,,rows swapped,I3,True
+210,out_of_sequence,17,331,332,row,,rows swapped,I3,True
+211,out_of_sequence,212,272,273,row,,rows swapped,I3,True
+212,out_of_sequence,129,45,46,row,,rows swapped,I3,True
+213,out_of_sequence,175,24,25,row,,rows swapped,I3,True
+214,out_of_sequence,74,199,200,row,,rows swapped,I3,True
+215,out_of_sequence,216,136,137,row,,rows swapped,I3,True
+216,out_of_sequence,162,282,283,row,,rows swapped,I3,True
+217,out_of_sequence,247,78,79,row,,rows swapped,I3,True
+218,out_of_sequence,201,263,264,row,,rows swapped,I3,True
+219,out_of_sequence,4,142,143,row,,rows swapped,I3,True
+220,out_of_sequence,95,58,59,row,,rows swapped,I3,True
+221,out_of_sequence,48,297,298,row,,rows swapped,I3,True
+222,out_of_sequence,14,76,77,row,,rows swapped,I3,True
+223,out_of_sequence,227,101,102,row,,rows swapped,I3,True
+224,out_of_sequence,151,81,82,row,,rows swapped,I3,True
+225,invalid_category,208,141,141,connection_state,UP,up,S3-status,True
+226,invalid_category,243,265,265,connection_state,UNSTABLE,UNKNOWN,S3-status,True
+227,invalid_category,61,296,296,connection_state,UNSTABLE,UNKNOWN,S3-status,True
+228,invalid_category,197,91,91,connection_state,UP,up,S3-status,True
+229,invalid_category,185,224,224,connection_state,UP,UNKNOWN,S3-status,True
+230,invalid_category,184,75,75,connection_state,UP,up,S3-status,True
+231,invalid_category,117,112,112,connection_state,UP,up,S3-status,True
+232,invalid_category,228,124,124,connection_state,UP,UNKNOWN,S3-status,True
+233,invalid_category,130,76,76,connection_state,UP,up,S3-status,True
+234,invalid_category,252,235,235,connection_state,UNSTABLE,UNKNOWN,S3-status,True
+235,invalid_category,101,166,166,connection_state,UP,up,S3-status,True
+236,invalid_category,241,131,131,connection_state,UP,up,S3-status,True
+237,invalid_category,186,61,61,connection_state,UP,up,S3-status,True
+238,invalid_category,57,43,43,connection_state,UP,up,S3-status,True
+239,invalid_category,134,235,235,connection_state,UNSTABLE,up,S3-status,True
+240,invalid_category,231,30,30,connection_state,UP,UNKNOWN,S3-status,True
+241,invalid_category,199,150,150,connection_state,UNSTABLE,UNKNOWN,S3-status,True
+242,invalid_category,26,104,104,connection_state,UP,UNKNOWN,S3-status,True
+243,invalid_category,115,112,112,connection_state,UP,up,S3-status,True
+244,invalid_category,174,72,72,connection_state,UP,up,S3-status,True
+245,invalid_category,53,133,133,connection_state,UP,up,S3-status,True
+246,invalid_category,57,340,340,connection_state,UNSTABLE,up,S3-status,True
+247,invalid_category,197,254,254,connection_state,UP,up,S3-status,True
+248,invalid_category,39,30,30,connection_state,UP,UNKNOWN,S3-status,True
+249,invalid_category,65,254,254,connection_state,UNSTABLE,up,S3-status,True
+250,inconsistent_status,3,303,303,connection_state,UNSTABLE,UP,O1,True
+251,inconsistent_status,139,62,62,connection_state,UP,UNSTABLE,O1,True
+252,inconsistent_status,152,155,155,connection_state,UNSTABLE,UP,O1,True
+253,inconsistent_status,215,171,171,connection_state,UP,UNSTABLE,O1,True
+254,inconsistent_status,228,202,202,connection_state,UNSTABLE,UP,O1,True
+255,inconsistent_status,219,325,325,connection_state,UNSTABLE,UP,O1,True
+256,inconsistent_status,23,182,182,connection_state,UP,UNSTABLE,O1,True
+257,inconsistent_status,212,22,22,connection_state,UP,UNSTABLE,O1,True
+258,inconsistent_status,248,100,100,connection_state,UP,UNSTABLE,O1,True
+259,inconsistent_status,114,295,295,connection_state,UP,UNSTABLE,O1,True
+260,inconsistent_status,33,115,115,connection_state,UP,UNSTABLE,O1,True
+261,inconsistent_status,179,195,195,connection_state,UNSTABLE,UP,O1,True
+262,inconsistent_status,159,46,46,connection_state,UP,UNSTABLE,O1,True
+263,inconsistent_status,129,143,143,connection_state,UP,UNSTABLE,O1,True
+264,inconsistent_status,108,299,299,connection_state,UP,UNSTABLE,O1,True
+265,inconsistent_status,51,118,118,connection_state,UP,UNSTABLE,O1,True
+266,inconsistent_status,115,62,62,connection_state,UP,UNSTABLE,O1,True
+267,inconsistent_status,171,93,93,connection_state,UP,UNSTABLE,O1,True
+268,inconsistent_status,174,86,86,connection_state,UP,UNSTABLE,O1,True
+269,inconsistent_status,30,256,256,connection_state,UNSTABLE,UP,O1,True
+270,inconsistent_status,120,80,80,connection_state,UP,UNSTABLE,O1,True
+271,inconsistent_status,35,158,158,connection_state,UP,UNSTABLE,O1,True
+272,inconsistent_status,160,206,206,connection_state,UNSTABLE,UP,O1,True
+273,inconsistent_status,21,240,240,connection_state,UNSTABLE,UP,O1,True
+274,inconsistent_status,92,168,168,connection_state,UP,UNSTABLE,O1,True
+275,frozen_value,42,120,124,"latency_ms,jitter_ms","17.570927956921768,3.5825036790945117","17.570927956921768,3.5825036790945117",O2,True
+276,frozen_value,252,173,177,"latency_ms,jitter_ms","26.25851186744451,2.4367489563654723","26.25851186744451,2.4367489563654723",O2,True
+277,frozen_value,116,338,342,"latency_ms,jitter_ms","88.32734615833371,36.10141441068602","88.32734615833371,36.10141441068602",O2,True
+278,frozen_value,11,180,184,"latency_ms,jitter_ms","77.6032146499212,36.05928918320132","77.6032146499212,36.05928918320132",O2,True
+279,frozen_value,146,285,289,"latency_ms,jitter_ms","27.4988836405917,7.16376533426476","27.4988836405917,7.16376533426476",O2,True
+280,frozen_value,158,227,231,"latency_ms,jitter_ms","28.040869741770948,17.547731118728006","28.040869741770948,17.547731118728006",O2,True
+281,frozen_value,130,50,54,"latency_ms,jitter_ms","32.79505242888661,3.105481817326425","32.79505242888661,3.105481817326425",O2,True
+282,frozen_value,47,200,204,"latency_ms,jitter_ms","25.445753662188114,3.45061217859876","25.445753662188114,3.45061217859876",O2,True
+283,frozen_value,224,277,281,"latency_ms,jitter_ms","29.212817571197473,1.2933589457397447","29.212817571197473,1.2933589457397447",O2,True
+284,frozen_value,189,300,304,"latency_ms,jitter_ms","14.902719991861119,3.0201161007287882","14.902719991861119,3.0201161007287882",O2,True
+285,frozen_value,94,183,187,"latency_ms,jitter_ms","17.333555401326674,2.9603703891157034","17.333555401326674,2.9603703891157034",O2,True
+286,frozen_value,94,63,67,"latency_ms,jitter_ms","17.574361573661392,3.178181919913704","17.574361573661392,3.178181919913704",O2,True
+287,frozen_value,136,233,237,"latency_ms,jitter_ms","20.689144995019692,5.39967583782564","20.689144995019692,5.39967583782564",O2,True
+288,frozen_value,205,36,40,"latency_ms,jitter_ms","18.650557075987464,3.7687335970555993","18.650557075987464,3.7687335970555993",O2,True
+289,frozen_value,93,42,46,"latency_ms,jitter_ms","20.638313772726494,2.2189787509683394","20.638313772726494,2.2189787509683394",O2,True
+290,frozen_value,217,153,157,"latency_ms,jitter_ms","30.352015989838293,8.238818118074393","30.352015989838293,8.238818118074393",O2,True
+291,frozen_value,89,195,199,"latency_ms,jitter_ms","36.44499559645344,7.690537212041452","36.44499559645344,7.690537212041452",O2,True
+292,frozen_value,153,37,41,"latency_ms,jitter_ms","31.907454160123102,2.9860617427110547","31.907454160123102,2.9860617427110547",O2,True
+293,frozen_value,106,111,115,"latency_ms,jitter_ms","32.1597722851154,2.9408458259259476","32.1597722851154,2.9408458259259476",O2,True
+294,frozen_value,153,310,314,"latency_ms,jitter_ms","91.159611390738,35.700534209029804","91.159611390738,35.700534209029804",O2,True
+295,frozen_value,170,99,103,"latency_ms,jitter_ms","31.754465613587037,1.8541897700506162","31.754465613587037,1.8541897700506162",O2,True
+296,frozen_value,16,168,172,"latency_ms,jitter_ms","30.707308193216303,2.3069418949476925","30.707308193216303,2.3069418949476925",O2,True
+297,frozen_value,78,112,116,"latency_ms,jitter_ms","32.07014818198495,13.377460098436021","32.07014818198495,13.377460098436021",O2,True
+298,frozen_value,185,32,36,"latency_ms,jitter_ms","21.97671969249648,2.941349301452656","21.97671969249648,2.941349301452656",O2,True
+299,frozen_value,27,139,143,"latency_ms,jitter_ms","25.02882682773388,0.7202930694954925","25.02882682773388,0.7202930694954925",O2,True
+300,plausible_offset,176,190,190,latency_ms,83.38303120917388,100.05963745100865,none,False
+301,plausible_offset,103,48,48,latency_ms,17.701414625375406,21.241697550450485,none,False
+302,plausible_offset,42,58,58,latency_ms,15.289466935242489,18.347360322290985,none,False
+303,plausible_offset,178,256,256,latency_ms,18.738372884196824,22.48604746103619,none,False
+304,plausible_offset,113,71,71,latency_ms,21.582630235380886,25.899156282457064,none,False
+305,plausible_offset,146,341,341,latency_ms,29.752938011174844,35.70352561340981,none,False
+306,plausible_offset,163,142,142,latency_ms,14.018597974669659,16.82231756960359,none,False
+307,plausible_offset,259,292,292,latency_ms,77.79093780311935,93.34912536374321,none,False
+308,plausible_offset,70,63,63,latency_ms,30.954592895037123,37.14551147404455,none,False
+309,plausible_offset,127,311,311,latency_ms,21.380010163335882,25.656012196003058,none,False
+310,plausible_offset,258,219,219,latency_ms,84.06628115332717,100.8795373839926,none,False
+311,plausible_offset,60,194,194,latency_ms,73.85056189403686,88.62067427284423,none,False
+312,plausible_offset,116,47,47,latency_ms,28.19731881297772,33.83678257557326,none,False
+313,plausible_offset,52,207,207,latency_ms,36.65830216644167,43.989962599730006,none,False
+314,plausible_offset,144,277,277,latency_ms,18.711802352401058,22.45416282288127,none,False
+315,plausible_offset,69,156,156,latency_ms,15.108831953837134,18.13059834460456,none,False
+316,plausible_offset,76,20,20,latency_ms,15.160485600267336,18.192582720320804,none,False
+317,plausible_offset,193,49,49,latency_ms,22.164555257428415,26.597466308914097,none,False
+318,plausible_offset,14,63,63,latency_ms,18.445597601266346,22.134717121519614,none,False
+319,plausible_offset,154,101,101,latency_ms,37.60712285776386,45.12854742931663,none,False
+320,plausible_offset,36,172,172,latency_ms,55.11909542961893,66.14291451554271,none,False
+321,plausible_offset,167,104,104,latency_ms,19.539454545416017,23.44734545449922,none,False
+322,plausible_offset,57,25,25,latency_ms,26.669156984082566,32.002988380899076,none,False
+323,plausible_offset,28,166,166,latency_ms,25.97626782621041,31.17152139145249,none,False
+324,plausible_offset,255,335,335,latency_ms,21.585374484797796,25.902449381757354,none,False

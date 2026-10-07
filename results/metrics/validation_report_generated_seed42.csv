@@ -1,0 +1,20 @@
+check,name,level,status,affected,episodes_affected,example,explanation
+S1-missing-required,Required column missing,FAIL,pass,0,,,Dataset structure differs from the expected schema
+S1-missing-status,Status column missing,WARN,pass,0,,,Dataset structure differs from the expected schema
+S1-unexpected,Unexpected extra column,WARN,pass,0,,,Dataset structure differs from the expected schema
+S2-telemetry,Missing key or detector telemetry,FAIL,pass,0,0,,The observation cannot be placed in time or is missing a value the analysis needs
+S2-status,Missing connection status,WARN,pass,0,0,,Status unavailable; status-based checks skip this minute
+S2-labels,Missing study label,FAIL,pass,0,0,,Study-label integrity: the row cannot be evaluated (synthetic-study field)
+S3-status,Invalid connection status,WARN,pass,0,0,,"Status value outside UP/UNSTABLE, e.g. a vendor or version format difference"
+S3-labels,Invalid study label,FAIL,pass,0,0,,Study-label integrity: label value outside the allowed set
+S4,Negative telemetry value,FAIL,pass,0,0,,"Delay, jitter, throughput and rates cannot be negative"
+S5,Percentage above 100,FAIL,pass,0,0,,"A share of packets, frames or segments cannot exceed 100%"
+S6,Throughput above link capacity,FAIL,pass,0,0,,Delivered traffic cannot exceed the configured link capacity
+I1,Duplicate episode/minute,FAIL,pass,0,0,,The same observation key appears more than once
+I2,Duplicate timestamp,FAIL,pass,0,0,,The same timestamp appears more than once within an episode
+I3,Timestamp out of sequence,FAIL,pass,0,0,,A timestamp is earlier than the previous record's in the same episode
+C1,Timestamp gap,WARN,pass,0,0,,Observations are missing between this record and the previous one
+O1,Status inconsistent with loss,WARN,pass,0,0,,connection_state disagrees with the rule UNSTABLE <=> probe loss >= 5%
+O2,Frozen probe metrics,WARN,pass,0,0,,"Latency and jitter repeat exactly, as from a stuck poller"
+O3,Saturated error counter,WARN,warn,377,"46 (10, 14, 21, 24, 25)","ep 10, min 299: error_rate_pct=100.0, throughput_mbps=15.18274948656127",Every frame reported as failing while traffic is still delivered
+U1,Statistically unusual value,INFO,info,30622,"255 (0, 1, 2, 3, 4)","ep 0, min 15: latency_ms=24.23053686185611, jitter_ms=5.307181803022325, packet_loss_pct=0.33333333333333337","Far from the bulk of the data; kept, NOT evidence of bad data"

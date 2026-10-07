@@ -1,0 +1,14 @@
+defect_type,expected_check,injected,detected,missed,note
+missing_value,S2-telemetry,25,25,0,
+exact_duplicate,I1,25,25,0,
+conflicting_duplicate,I1,25,25,0,
+negative_latency,S4,25,25,0,
+negative_throughput,S4,25,25,0,
+percent_over_100,S5,25,25,0,
+throughput_over_capacity,S6,25,25,0,
+timestamp_gap,C1,25,25,0,
+out_of_sequence,I3,25,25,0,
+invalid_category,S3-status,25,25,0,
+inconsistent_status,O1,25,25,0,
+frozen_value,O2,25,25,0,
+plausible_offset,none,25,0,25,undetectable by design; 'detected' = flagged by any FAIL/WARN check

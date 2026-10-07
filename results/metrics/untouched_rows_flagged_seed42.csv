@@ -1,0 +1,17 @@
+check,level,untouched_rows_flagged
+S2-telemetry,FAIL,0
+S2-status,WARN,0
+S2-labels,FAIL,0
+S3-status,WARN,0
+S3-labels,FAIL,0
+S4,FAIL,0
+S5,FAIL,0
+S6,FAIL,0
+I1,FAIL,0
+I2,FAIL,0
+I3,FAIL,0
+C1,WARN,0
+O1,WARN,0
+O2,WARN,0
+O3,WARN,377
+U1,INFO,30373

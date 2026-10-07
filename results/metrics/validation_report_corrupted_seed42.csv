@@ -1,0 +1,20 @@
+check,name,level,status,affected,episodes_affected,example,explanation
+S1-missing-required,Required column missing,FAIL,pass,0,,,Dataset structure differs from the expected schema
+S1-missing-status,Status column missing,WARN,pass,0,,,Dataset structure differs from the expected schema
+S1-unexpected,Unexpected extra column,WARN,pass,0,,,Dataset structure differs from the expected schema
+S2-telemetry,Missing key or detector telemetry,FAIL,fail,25,"25 (1, 3, 23, 27, 35)","ep 1, min 293: timestamp=2000-01-01 10:53:00, latency_ms=15.67227243397982, jitter_ms=1.9668361385173005",The observation cannot be placed in time or is missing a value the analysis needs
+S2-status,Missing connection status,WARN,pass,0,0,,Status unavailable; status-based checks skip this minute
+S2-labels,Missing study label,FAIL,pass,0,0,,Study-label integrity: the row cannot be evaluated (synthetic-study field)
+S3-status,Invalid connection status,WARN,warn,25,"23 (26, 39, 53, 57, 61)","ep 26, min 104: connection_state=UNKNOWN","Status value outside UP/UNSTABLE, e.g. a vendor or version format difference"
+S3-labels,Invalid study label,FAIL,pass,0,0,,Study-label integrity: label value outside the allowed set
+S4,Negative telemetry value,FAIL,fail,50,"43 (2, 8, 9, 11, 19)","ep 2, min 234: latency_ms=-24.40701026566349, jitter_ms=2.227046027602364, packet_loss_pct=0.0","Delay, jitter, throughput and rates cannot be negative"
+S5,Percentage above 100,FAIL,fail,25,"21 (4, 18, 25, 37, 50)","ep 4, min 284: packet_loss_pct=1950.0, error_rate_pct=0.00809652215269328, retransmission_rate_pct=15.417876071265832","A share of packets, frames or segments cannot exceed 100%"
+S6,Throughput above link capacity,FAIL,fail,25,"25 (8, 9, 17, 33, 39)","ep 8, min 122: throughput_mbps=619.6937777454084",Delivered traffic cannot exceed the configured link capacity
+I1,Duplicate episode/minute,FAIL,fail,100,"49 (10, 11, 13, 14, 17)","ep 10, min 123: ",The same observation key appears more than once
+I2,Duplicate timestamp,FAIL,fail,100,"49 (10, 11, 13, 14, 17)","ep 10, min 123: timestamp=2000-01-03 14:03:00",The same timestamp appears more than once within an episode
+I3,Timestamp out of sequence,FAIL,fail,25,"25 (4, 7, 14, 17, 38)","ep 4, min 142: timestamp=2000-01-02 02:22:00",A timestamp is earlier than the previous record's in the same episode
+C1,Timestamp gap,WARN,warn,25,"22 (2, 14, 57, 58, 66)","ep 2, min 263: timestamp=2000-01-01 16:23:00",Observations are missing between this record and the previous one
+O1,Status inconsistent with loss,WARN,warn,26,"26 (3, 21, 23, 30, 33)","ep 3, min 303: connection_state=UP, packet_loss_pct=18.166666666666668",connection_state disagrees with the rule UNSTABLE <=> probe loss >= 5%
+O2,Frozen probe metrics,WARN,warn,125,"23 (11, 16, 27, 42, 47)","ep 11, min 180: timestamp=2000-01-03 21:00:00, latency_ms=77.6032146499212, jitter_ms=36.05928918320132","Latency and jitter repeat exactly, as from a stuck poller"
+O3,Saturated error counter,WARN,warn,377,"46 (10, 14, 21, 24, 25)","ep 10, min 299: error_rate_pct=100.0, throughput_mbps=15.18274948656127",Every frame reported as failing while traffic is still delivered
+U1,Statistically unusual value,INFO,info,30577,"255 (0, 1, 2, 3, 4)","ep 0, min 15: latency_ms=24.23053686185611, jitter_ms=5.307181803022325, packet_loss_pct=0.33333333333333337","Far from the bulk of the data; kept, NOT evidence of bad data"

@@ -122,6 +122,35 @@ INTERFERENCE_BURST_ERROR_FACTOR = (10.0, 50.0)
 # --- Reactive status ---
 UNSTABLE_LOSS_PCT = 5.0  # connection_state = UNSTABLE when probe loss >= this
 
+# =============================================================================
+# TELEMETRY INTEGRITY & VALIDATION LAYER settings.
+# NOT part of the frozen generator: these configure validation and the deliberate
+# corruption of a COPY of the data. They never affect the generated telemetry.
+# =============================================================================
+
+# --- Field roles: what a problem in each column means ---
+RECORD_KEY_COLUMNS = ["episode_id", "minute", "timestamp"]  # place a row in time/episode
+STATUS_COLUMN = "connection_state"                           # reactive status, not a detector input
+STUDY_LABEL_COLUMNS = ["episode_type", "cause", "hidden_severity", "state"]  # synthetic-only
+CONNECTION_STATES = ["UP", "UNSTABLE"]
+PERCENT_COLUMNS = ["packet_loss_pct", "error_rate_pct", "retransmission_rate_pct"]
+
+# --- Validation rules ---
+FROZEN_RUN_MINUTES = 3     # latency AND jitter identical across this many minutes -> O2
+UNUSUAL_IQR_FACTOR = 3.0   # U1: value above Q3 + factor x IQR is "statistically unusual"
+
+# --- Deliberate defect injection (applied to a copy only) ---
+DEFECT_SEED_OFFSET = 1000        # injection uses its own random stream: seed + offset
+DEFECT_EVENTS_PER_TYPE = 25
+DEFECT_SPACING_MIN = 10          # minimum minutes between defect footprints in an episode
+DEFECT_EDGE_MARGIN_MIN = 5       # no defects in the first/last minutes of an episode
+GAP_LENGTH_RANGE_MIN = (3, 10)   # minutes removed by a timestamp_gap defect
+FROZEN_DEFECT_LENGTH_MIN = 4     # minutes that repeat the previous value
+CONFLICT_FACTOR = 1.1            # conflicting duplicate: latency x this
+PLAUSIBLE_OFFSET_FACTOR = 1.2    # miscalibrated probe: latency x this (undetectable by design)
+PERCENT_OVER_100_MIN_LOSS = 1.2  # unit error applied only where loss x 100 exceeds 100
+COUNTER_WRAP_MBPS = 2**32 * 8 / SAMPLE_INTERVAL_SECONDS / 1e6  # one 32-bit byte-counter wrap
+
 # --- Paths ------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GENERATED_DATA_DIR = PROJECT_ROOT / "data" / "generated"
