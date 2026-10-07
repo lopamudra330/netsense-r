@@ -25,10 +25,14 @@ a validation layer checks whether the telemetry itself can be trusted.
 
 **Primary research question**
 
-> In a controlled, synthetic model of gradual communication-link degradation, how early
-> and how reliably can (a) conventional threshold monitoring and (b) simple interpretable
-> machine-learning models detect the onset of degradation before the link reaches severe
-> failure, and at what cost in false alarms?
+> In a controlled, synthetic model of gradual communication-link degradation, how
+> reliably can (a) conventional threshold monitoring and (b) simple interpretable
+> machine-learning models detect degradation, how much warning can they give before the
+> link enters a severe degradation state, and at what cost in false alarms?
+
+The evidence comes from independent simulated episodes, each one a single link observed
+for several hours. The episode, not the individual telemetry row, is the unit of
+evidence, because consecutive measurements within an episode are closely related.
 
 Supporting research questions and the experimental design are in
 [`docs/methodology.md`](docs/methodology.md).
