@@ -151,6 +151,13 @@ PLAUSIBLE_OFFSET_FACTOR = 1.2    # miscalibrated probe: latency x this (undetect
 PERCENT_OVER_100_MIN_LOSS = 1.2  # unit error applied only where loss x 100 exceeds 100
 COUNTER_WRAP_MBPS = 2**32 * 8 / SAMPLE_INTERVAL_SECONDS / 1e6  # one 32-bit byte-counter wrap
 
+# =============================================================================
+# EXPERIMENT SETTINGS (fixed before running Experiment 1; not generator parameters)
+# =============================================================================
+
+# --- Episode-level train/test split (frozen, reused by Experiments 1-4) ---
+SPLIT_SEED_OFFSET = 2000  # the split uses its own random stream: seed + offset
+
 # --- Paths ------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GENERATED_DATA_DIR = PROJECT_ROOT / "data" / "generated"
