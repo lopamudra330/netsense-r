@@ -141,7 +141,11 @@ def test_ml_events_keep_seed_episode_identity_separate():
     assert list(zip(events.seed, events.episode_id)) == [(42, 7)]
 
 
-def test_evaluate_mode_refuses_before_authorisation():
-    from experiments import e3_ml_detector
+def test_evaluate_refuses_without_intact_frozen_state_and_never_loads_data(monkeypatch):
+    from experiments import e2_threshold_baseline, e3_ml_detector
+    def forbidden(*args, **kwargs):
+        raise AssertionError("held-out data must not be loaded")
+    monkeypatch.setattr(e2_threshold_baseline, "test_data", forbidden)
+    monkeypatch.setattr(e3_ml_detector, "FROZEN_COMMIT", "0000000")  # not the frozen commit
     with pytest.raises(SystemExit):
         e3_ml_detector.evaluate()

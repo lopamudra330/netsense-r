@@ -1071,6 +1071,258 @@ independent feature importance.
    verified and not causal.
 4. The latency and retransmission groups were nearly redundant in the sensitivity diagnostic.
 
+### 13.10 Phase 2: held-out evaluation
+
+*Added after the single held-out evaluation. Sections 13.1–13.9, including the pre-recorded
+expectations in 13.8, are unchanged.* **This was the first and only Experiment 3 held-out
+evaluation.** Everything below is taken from the saved Phase 2 outputs
+(`e3_results_test.csv`, `e3_minute_diagnostics_test.csv`, `e3_ml_vs_engineering.csv`,
+`e3_train_vs_test.csv`, Figure 7); nothing was re-evaluated while writing this section.
+
+- **Pre-test specification.** Commit `2de1733` was the immutable pre-test ML specification.
+  The evaluation refused to run unless `netsense/`, the Experiment 2 code, `e3_ml_spec.json`,
+  the Phase 1 result files, Figure 8 and the Experiment 2 specification and held-out results
+  were byte-identical to that commit.
+- **No refitting.** Scores were reconstructed from the numbers stored in `e3_ml_spec.json`
+  (standardisation means and standard deviations, coefficients, intercept). The frozen
+  threshold τ = 0.6447583878236622 was applied as `score > τ`. Labels were used only for
+  evaluation. Persistence, alarm events and the event-level evaluation are the frozen
+  Experiment 2 functions.
+- **Scope.** 650 held-out episodes over five seeds (42–46): 300 worsening, 150 recovering,
+  200 stable; 2,227 healthy hours; 234,000 rows, of which 228,150 had a defined score
+  (the rest are the first nine minutes of each episode). Each seed contributed the expected
+  strata (40 stable; 30 worsening and 15 recovering per cause). Zero training episodes
+  entered Phase 2. Episodes were identified by (seed, episode_id).
+- **Engineering comparison.** Engineering values were read from the committed
+  `e2_results_test.csv` and `e2_results_test_by_cause.csv`; Experiment 2 was not re-run.
+- **Integrity.** No Phase 2 software bug occurred, and no analytical change was made after
+  test exposure. Figure 7's layout was finalised on a training-data dry run before the test
+  run. Afterwards only presentation changed (label placement, panel title, one decimal for
+  non-integer bar labels so that 99.7% and 99.0% are not displayed as 100), re-rendered from
+  the saved CSVs without re-evaluating.
+
+**Held-out results** (ML, pooled over five seeds):
+
+| Metric | ML-A | ML-B | ML-C1 | ML-C2 |
+|---|---|---|---|---|
+| Detection, worsening | 99.7% | 100% | 99.0% | 99.0% |
+| Detection, recovering | 94.7% | 91.3% | 92.7% | 90.7% |
+| False alarms / 100 healthy h | 24.4 | 12.9 | 14.1 | 9.7 |
+| Healthy alarm burden | 4.5% | 2.5% | 4.2% | 4.0% |
+| Median delay, min (25th–75th) | 32 (22–47) | 37 (25–53) | 36 (25–52) | 40 (28–56) |
+| Warned before severe | 99.7% | 100% | 99.0% | 99.0% |
+| Median severe lead, min (25th–75th) | 46 (30–65) | 40 (25–57) | 42 (26–60) | 37 (23–54) |
+| Valid / active at onset only / no valid alarm (of 450) | 441 / 1 / 8 | 437 / 0 / 13 | 436 / 3 / 11 | 433 / 4 / 13 |
+
+**Per-seed ranges (held-out):**
+
+| Detector | False alarms / 100 h | Median delay (min) | Recovering detection | Worsening detection |
+|---|---|---|---|---|
+| ML-A | 20.4–29.6 | 30–34 | 90–100% | 98.3–100% |
+| ML-B | 10.8–15.9 | 35–39 | 83–97% | 100% |
+| ML-C1 | 12.4–17.7 | 34.5–38 | 90–97% | 98.3–100% |
+| ML-C2 | 8.4–12.3 | 38–42 | 83–97% | 96.7–100% |
+| Eng-A | 37.1–50.0 | 32–40 | 83–93% | 100% |
+| Eng-B | 15.6–21.3 | 43–51 | 67–87% | 100% |
+| Eng-C1 | 18.8–23.6 | 42–48 | 73–87% | 100% |
+| Eng-C2 | 5.2–9.0 | 51–57 | 63–80% | 100% |
+
+**By cause** (held-out, ML vs engineering):
+
+| | | A | B | C1 | C2 |
+|---|---|---|---|---|---|
+| Congestion | Median delay, ML / Eng (min) | 43 / 40 | 51 / 54.5 | 49 / 51 | 54 / 63 |
+| | Recovering detection, ML / Eng | 89.3% / 94.7% | 84.0% / 74.7% | 86.7% / 81.3% | 84.0% / 73.3% |
+| | Worsening detection, ML / Eng | 100% / 100% | 100% / 100% | 99.3% / 100% | 99.3% / 100% |
+| Link quality | Median delay, ML / Eng (min) | 25 / 32 | 28 / 41 | 28 / 39.5 | 31 / 46 |
+| | Recovering detection, ML / Eng | 100% / 86.7% | 98.7% / 80.0% | 98.7% / 82.7% | 97.3% / 73.3% |
+| | Worsening detection, ML / Eng | 99.3% / 100% | 100% / 100% | 98.7% / 100% | 98.7% / 100% |
+
+- For link-quality degradation, ML was faster than engineering for every persistence rule
+  (by 7–15 minutes) and detected 97–100% of recovering episodes.
+- For congestion, the ML advantage was smaller and not uniform: ML-A was **later** than Eng-A
+  (43 vs 40 min) and detected fewer recovering congestion episodes (89.3% vs 94.7%).
+- Congestion was detected later than link quality by every ML variant (median 43–54 vs
+  25–31 minutes).
+
+**Training → test** (`e3_train_vs_test.csv`; change = test − training):
+- False alarms per 100 h: +0.2 (A), +1.4 (B), +2.0 (C1), +1.1 (C2). Median delay: unchanged
+  for all four (32 / 37 / 36 / 40). Median severe lead: 0 to ±1 minute. Healthy burden:
+  +0.2 to +0.4 percentage points. All of these lie within the training per-seed ranges.
+- **Outside the training per-seed ranges:** worsening detection for ML-A (99.7%), ML-C1
+  (99.0%) and ML-C2 (99.0%), against 100% in every training seed; warned-before-severe for
+  ML-A and ML-C1 (also 100% in every training seed); and ML-A recovering detection (94.7%,
+  above the training maximum of 93.3%).
+- No ML variant had an "alarm already active at onset" outcome in training; on test there were
+  1 (A), 0 (B), 3 (C1) and 4 (C2).
+
+**Per-minute diagnostics — secondary evidence** (held-out scored rows with a defined label;
+`e3_minute_diagnostics_test.csv`; training values in brackets):
+
+| Metric | ML (score > τ) | Frozen engineering condition |
+|---|---|---|
+| ROC-AUC | 0.965 (0.962) | — |
+| PR-AUC | 0.966 (0.964) | — |
+| Precision / recall / F1 | 0.962 / 0.822 / 0.886 | 0.958 / 0.735 / 0.832 |
+| Healthy trigger rate | 2.38% (2.13%) | 2.32% (2.14%) |
+| EARLY_DEGRADATION hit rate | 34.2% (34.7%) | 9.2% (10.0%) |
+| DEGRADED hit rate | 88.1% (87.6%) | 71.7% (72.1%) |
+| SEVERE_DEGRADATION hit rate | 100% | 99.99% |
+
+At approximately comparable healthy trigger rates (2.38% vs 2.32%), the higher
+EARLY_DEGRADATION hit rate observed in training was retained on held-out episodes. The ML
+healthy trigger rate on test was slightly above the training target (2.38% vs 2.13%).
+
+**Matched-pair comparison with the engineering baseline** (`e3_ml_vs_engineering.csv`).
+Pre-declared rule: ML-X improves on Eng-X only if (lower false-alarm rate with no worse
+median delay, or shorter median delay with no worse false-alarm rate) **and** worsening
+detection is not lower.
+
+| Pair | False alarms / 100 h (ML vs Eng) | Median delay, min | Worsening detection | Recovering detection | Burden | Classification |
+|---|---|---|---|---|---|---|
+| A | 24.4 vs 43.4 | 32 vs 36.5 | 99.7% vs 100% | 94.7% vs 90.7% | 4.5% vs 6.1% | trade-off / neither dominates |
+| B | 12.9 vs 18.0 | 37 vs 47 | 100% vs 100% | 91.3% vs 77.3% | 2.5% vs 2.3% | **ML dominates under pre-declared rule** |
+| C1 | 14.1 vs 21.5 | 36 vs 45 | 99.0% vs 100% | 92.7% vs 82.0% | 4.2% vs 5.2% | trade-off / neither dominates |
+| C2 | 9.7 vs 6.4 | 40 vs 55.5 | 99.0% vs 100% | 90.7% vs 73.3% | 4.0% vs 2.1% | trade-off / neither dominates |
+
+- ML-A and ML-C1 had fewer false alarms and shorter delays than their counterparts, but
+  failed the rule because worsening detection was lower by one and three episodes (of 300).
+  The rule is applied as written.
+- ML-C2 was 15.5 minutes faster than Eng-C2 but had more false alarms (9.7 vs 6.4 per 100 h)
+  and nearly double the healthy burden (4.0% vs 2.1%).
+- ML-B's healthy burden was marginally higher than Eng-B's (2.5% vs 2.3%); burden is not part
+  of the rule.
+- **Seed variability** (a difference counts as within seed variability if it is smaller than
+  the wider of the two detectors' per-seed ranges): for A the delay difference was within
+  seed variability but the false-alarm difference was not; for B the false-alarm difference
+  was within seed variability (per-seed ranges 10.8–15.9 and 15.6–21.3 overlap) but the delay
+  difference was not; for C1 and C2 neither was. **No pair was "effectively similar within
+  observed seed variability"** on both measures.
+- No overall winner is declared.
+
+**Engineering frontier** (false alarms vs median delay, all eight detectors, Figure 7):
+- Not dominated on both measures: ML-A, ML-B, ML-C1, ML-C2 and Eng-C2.
+- Dominated on both measures: Eng-A (by ML-A and ML-C1), Eng-B and Eng-C1 (each by ML-B,
+  ML-C1 and ML-C2).
+- Eng-C2 remains the lowest-false-alarm operating point (6.4 per 100 h).
+- This two-measure view ignores worsening detection, where every engineering detector
+  achieved 100% and three ML variants did not.
+
+**Comparison with the pre-recorded expectations (13.8):**
+
+| Expectation | Held-out result | Verdict |
+|---|---|---|
+| Higher EARLY hit rate than engineering | 34.2% vs 9.2% at comparable healthy trigger rates | Matches |
+| ML-A far fewer false alarms, similar or slightly longer delay | 24.4 vs 43.4 per 100 h (−44%); delay 4.5 minutes *shorter*; one fewer worsening episode credited | Partly: better than expected on delay, slightly worse on worsening detection |
+| ML-B/C1/C2 smaller gains; persistence hard to beat | False-alarm gains shrank in absolute terms (−5.1, −7.4) and reversed for C2 (+3.3); delay gains grew (−10, −9, −15.5) | Mixed |
+| At least one ML variant at or near the frontier | All four ML variants undominated; three engineering variants dominated | Matches |
+| Recovering still harder | ML recovering 90.7–94.7% vs worsening 99–100% | Matches |
+| Congestion later | 43–54 vs 25–31 minutes | Matches |
+| Coefficient signs | Assessed in Phase 1 (13.9); not re-assessed | — |
+| Bursts still cause false alarms | False alarms persist (9.7–24.4 per 100 h), but no pre-declared Phase 2 output attributes them to bursts | Not assessed |
+| Training vs test similar | False alarms, delay and lead within training per-seed ranges; worsening detection slightly below training | Matches, with the exception noted |
+
+**Unexpected findings, retained as observed:**
+1. Worsening detection fell below 100% for ML-A, ML-C1 and ML-C2 on held-out episodes
+   (1, 3 and 3 of 300), although it was 100% in every training seed. These are the episodes
+   whose outcome was "alarm already active at onset" with no subsequent valid alarm (see
+   13.11, Finding 6). This drives the "trade-off" classification of pairs A and C1.
+2. ML-A was later than Eng-A for congestion (43 vs 40 minutes) and detected fewer recovering
+   congestion episodes (89.3% vs 94.7%), although it was faster and more sensitive overall.
+3. ML-C2 again produced more false alarms than Eng-C2, as in training; it was not an
+   artefact of the training sample.
+4. The ML healthy trigger rate on test (2.38%) exceeded the training target (2.13%) slightly
+   more than the engineering condition's did (2.32% vs 2.14%).
+
+### 13.11 Interpretation and limitations
+
+All findings describe the frozen synthetic environment. Experiment 3 detects **current**
+degradation; it does not forecast. "Early warning" in the broader sense (section 8) is
+reserved as a future research question and is not claimed here.
+
+**Finding 1 — ML-B satisfies the pre-declared improvement rule.** On held-out episodes ML-B
+produced 12.9 vs 18.0 false alarms per 100 healthy hours, a median delay of 37 vs 47
+minutes, 100% vs 100% worsening detection and 91.3% vs 77.3% recovering detection. ML-B
+therefore improves on Eng-B under the pre-declared matched-pair criterion. This is a
+statement about one matched pair under one rule, not a claim that ML-B is a universal or
+overall best detector; its false-alarm difference also lies within the observed seed
+variability, and its healthy burden is marginally higher (2.5% vs 2.3%).
+
+**Finding 2 — the EARLY_DEGRADATION sensitivity advantage survives held-out evaluation.** At
+approximately comparable healthy trigger rates, the ML condition flagged 34.2% of
+EARLY_DEGRADATION minutes against 9.2% for the engineering condition (training: 34.7% vs
+10.0%). Experiment 1 found that EARLY observations overlap strongly with NORMAL ones at the
+individual-minute level (11.6). A plausible, unverified reading is that combining indicators and
+averaging over 10 minutes recovers part of a weak shift that single-minute thresholds miss.
+Even so, roughly two thirds of EARLY minutes were not flagged, and this is a higher
+EARLY_DEGRADATION hit rate for current-state detection, not evidence of early warning or
+prognosis.
+
+**Finding 3 — ML does not universally dominate engineering monitoring.**
+- ML-A: fewer false alarms and shorter delay than Eng-A, but one fewer worsening episode
+  credited.
+- ML-C1: fewer false alarms and shorter delay than Eng-C1, but three fewer worsening
+  episodes credited.
+- ML-C2: much faster than Eng-C2 (40 vs 55.5 minutes) but more false alarms (9.7 vs 6.4 per
+  100 h) and higher healthy burden (4.0% vs 2.1%).
+- Eng-C2 remains a useful low-false-alarm operating point, undominated on the frontier.
+
+**Finding 4 — persistence remains an operational design choice.** Across the four ML
+variants, false alarms fell from 24.4 to 9.7 per 100 h while median delay rose from 32 to
+40 minutes and severe lead fell from 46 to 37 minutes. ML shifted the trade-off between
+false alarms, delay, sensitivity and burden, but did not eliminate it.
+
+**Finding 5 — mechanism matters.** ML gains were concentrated in link-quality degradation
+(7–15 minutes faster than engineering, 97–100% recovering detection). For congestion the
+gains were smaller, and with A they reversed (later detection, fewer recovering episodes
+detected). Congestion was detected later than link quality by every detector. These are
+properties of the simulator's mechanisms (multiplicative error-rate growth vs a queueing
+delay that stays small until utilisation is high) and must not be generalised as universal
+network behaviour.
+
+**Finding 6 — event semantics matter.** Every worsening episode that was not credited as
+detected had an alarm already active at degradation onset and no subsequent valid new alarm
+event. The detector was alarming during the episode; under the pre-declared event
+definitions, an alarm that began before onset cannot earn detection credit, and the same
+alarm continued without clearing. These cases are failures to receive valid post-onset
+detection credit; they are not cases in which the detector "never noticed" the episode.
+They are retained as counted, without reclassification, because the event definitions were
+fixed before evaluation. A deployed system would need its own policy for alarms that are
+already active when degradation begins.
+
+**Finding 7 — held-out consistency is encouraging but limited.** Training and test false
+alarms, delay and lead were similar, and the minute-level results were reproduced closely.
+Both sets come from the same frozen simulator family. This does **not** demonstrate:
+- real-network validity;
+- generalisation to unseen degradation mechanisms;
+- prognosis;
+- causal relationships between indicators and degradation;
+- universal ML superiority.
+
+**Overall conclusion.** Experiment 3 found that an interpretable logistic detector combining
+multiple telemetry indicators with short causal temporal context could improve operational
+degradation detection beyond fixed engineering thresholds in the frozen synthetic
+environment. On held-out episodes, the ML-B configuration reduced false alarms from 18.0 to
+12.9 per 100 healthy hours and median detection delay from 47 to 37 minutes while preserving
+100% detection of worsening episodes. The learned detector also identified substantially
+more EARLY_DEGRADATION minutes at a comparable healthy trigger rate. However, the benefit
+was not universal across persistence policies: other ML variants introduced trade-offs in
+worsening detection, false alarms, or alarm burden. These findings therefore support ML as a
+potentially useful complement to transparent engineering monitoring rather than
+establishing universal superiority.
+
+**Limitations specific to Experiment 3**
+- The ML detector was trained with hidden-state labels that a real network would not
+  provide; the engineering thresholds used healthy minutes only.
+- Only one model family (logistic regression with default regularisation), one feature set
+  and one threshold rule were evaluated; no alternatives were tried, by design.
+- τ was matched to the engineering condition's healthy trigger rate on training data; other
+  operating points were not evaluated.
+- Coefficients are descriptive and redistribute across correlated features (13.9).
+- False alarms were not attributed to bursts.
+- Only one held-out split from one simulator was evaluated, and all Experiment 2 limitations
+  (12.9) also apply.
+
 ## Change log
 
 | Date | Change | Reason |
@@ -1088,3 +1340,4 @@ independent feature importance.
 | 2026-10-08 | Added Experiment 2 Phase 2 held-out results (12.8) and interpretation and limitations (12.9); clarified the Figure 6 selection rule operationally | Single held-out evaluation of the specification frozen at ddd57ca; no detector, threshold or metric changed |
 | 2026-10-08 | Added the Experiment 3 method, threshold construction and expectations recorded before running | Interpretable ML detector specified before any model was fitted |
 | 2026-10-08 | Added Experiment 3 Phase 1 training results (13.9) and froze the ML specification | Training-only, in-sample results; no model, feature, threshold or rule changed |
+| 2026-10-08 | Added Experiment 3 Phase 2 held-out results (13.10) and interpretation and limitations (13.11) | Single held-out evaluation of the specification frozen at 2de1733; no model, feature, threshold, rule or metric changed |
