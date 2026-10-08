@@ -724,6 +724,116 @@ engineering trade-off between four things: false-alarm suppression, detection de
 sensitivity to recovering degradation, and severe-degradation lead time. Whether this
 trade-off holds on held-out episodes is the question for Phase 2.
 
+### 12.8 Phase 2: held-out evaluation
+
+*Added after the single held-out evaluation. Sections 12.1–12.7 are unchanged.*
+
+- **Pre-test specification.** Commit `ddd57ca` was the immutable pre-test detector
+  specification. The evaluation refused to run unless the detector, evaluation, config,
+  generator, split and specification files were byte-identical to that commit.
+- **Thresholds** were loaded from the committed `e2_detector_spec.json` and were not
+  recomputed.
+- **Scope.** 650 held-out episodes were evaluated (300 worsening, 150 recovering, 200
+  stable; 2,227 healthy hours; five seeds). Zero training episodes entered Phase 2. Episodes
+  were identified by (seed, episode_id).
+- **Integrity.** No Phase 2 software bug occurred, and no analytical tuning was performed
+  after test exposure. Figure layout was finalised on a training-data dry run before the
+  test run. The only change afterwards was presentation (label placement; Figure 5's delay
+  axis starting at 0), re-rendered from the saved result files without re-evaluating.
+
+**Held-out results** (pooled; `results/metrics/e2_results_test*.csv`, training comparison in
+`e2_train_vs_test.csv`):
+
+| Metric (test; change vs training) | A (1 of 1) | B (3 of 3) | C1 (3 of 10) | C2 (6 of 20) |
+|---|---|---|---|---|
+| Detection rate, worsening | 100% (0) | 100% (0) | 100% (0) | 100% (0) |
+| Detection rate, recovering | 90.7% (+2.7) | 77.3% (−0.7) | 82.0% (+1.3) | 73.3% (+0.7) |
+| False alarms per 100 healthy h | 43.4 (+1.3) | 18.0 (+0.2) | 21.5 (+0.1) | 6.4 (+1.5) |
+| Healthy alarm burden | 6.1% (+0.2) | 2.3% (+0.1) | 5.2% (+0.2) | 2.1% (+0.4) |
+| Median delay, min (25th–75th) | 36.5 (23–51) (+0.5) | 47 (32–64) (+1.0) | 45 (31–60) (+2.0) | 55.5 (41–71) (+4.5) |
+| Warned before severe | 100% (0) | 99.3% (0) | 100% (0) | 99.3% (+1.3) |
+| Median severe lead, min | 42 (+1.5) | 32 (+1.0) | 34 (0) | 26 (0) |
+| Valid / active at onset only / no valid alarm (of 450) | 436 / 0 / 14 | 416 / 1 / 33 | 423 / 0 / 27 | 410 / 2 / 38 |
+
+**Findings on held-out data**
+- All four detectors detected 100% of worsening test episodes.
+- A had the shortest median delay but the highest false-alarm rate and burden.
+- C2 had the lowest false-alarm rate but the longest delay and the lowest recovering-episode
+  detection.
+- B occupied an intermediate trade-off.
+- C1 produced only a modest timing improvement over B (2 minutes) while increasing false
+  alarms (21.5 vs 18.0 per 100 h) and healthy alarm burden (5.2% vs 2.3%).
+- Persistence therefore suppressed false alarms at the cost of detection speed and
+  sensitivity to recovering degradation, and severe-degradation lead time decreased as
+  persistence increased (42 → 32/34 → 26 minutes).
+- Link-quality degradation was detected earlier than congestion, by 8–17 minutes in median
+  delay.
+- First-trigger signatures: link-quality detections began from error-type evidence in
+  87–91% of cases. Congestion detections began from delay-type evidence alone in 54–67%,
+  from both groups in 16–35%, and from error-type evidence alone in 3–17%.
+- **Training and held-out results were broadly consistent, with a small worse-direction tilt
+  on test:** every false-alarm and delay change was zero or slightly unfavourable. This is
+  held-out generalisation within the same frozen simulator family, **not evidence of
+  real-network generalisation.**
+
+**Unexpected results, retained as observed**
+- C2's test false-alarm rate was worse than training (6.4 vs 4.9 per 100 h).
+- C2's test median delay was worse than training (55.5 vs 51 minutes), above every
+  training seed's value (49–54), although the test per-seed values (51–57) overlap that range.
+- **Recovering detection by cause reversed:** on test, A detected 94.7% of recovering
+  congestion episodes vs 86.7% of link-quality ones, whereas training showed 81% vs 95%
+  (75 episodes per cause). This is retained as an observed subgroup result.
+- Alarm-already-active-at-onset cases (with no later valid detection) occurred occasionally:
+  B once, C2 twice (none in training).
+- **The onset-credit caveat remains.** 12.0% of A's first valid detections in worsening
+  episodes occurred while hidden severity was still below 0.10 (training: 12.3%); for B,
+  C1 and C2 the figures were 6.3%, 7.7% and 1.7%. Some very-early post-onset detections
+  may be coincidental threshold excursions. In the Figure 6 link-quality example, A, B and
+  C1 first fired on a short error-rate spike during early degradation, before the
+  sustained threshold crossing. None of these detections were reclassified.
+
+**Figure 6 episode selection, stated operationally:** for each cause, the seed-42 held-out
+worsening episode whose onset-to-severe duration is closest to the sample median
+onset-to-severe duration was selected; if several episodes were equally close, the lowest
+`episode_id` was chosen. With an even number of episodes (30 per cause) the sample median
+may lie between observed durations. This clarifies the existing deterministic rule; it is
+not a new selection. Selected: congestion (42, 18), duration 79 min against a median of 81
+(tied with episode 116 at 83 min); link quality (42, 37), duration 88 min, equal to the
+median (tied with episode 144). The figure caption's phrase "the median onset-to-severe
+duration" refers to this rule.
+
+### 12.9 Interpretation and limitations
+
+All findings describe the frozen synthetic environment.
+
+1. **Persistence works, but not for free.** Temporal persistence substantially reduced
+   false-alarm events but increased detection delay.
+2. **No universally best detector exists.** Choosing a detector is an engineering trade-off
+   among false alarms, delay, sensitivity to recovering degradation and severe-degradation
+   lead time.
+3. **100% eventual worsening detection is insufficient as a performance claim.** All
+   detectors eventually detected every worsening episode, but they differed substantially
+   in *when* they did so.
+4. **Short gap-tolerant persistence added limited value.** C1 detected only modestly earlier
+   than B while increasing false alarms and healthy alarm burden.
+5. **Healthy abnormal observations cluster.** Persistence removes isolated noise more
+   effectively than sustained harmless variation and bursts.
+6. **Mechanism signatures differ within the simulator.** Congestion was predominantly
+   associated with delay-type first evidence and link-quality degradation with error-type
+   evidence. This reflects the simulated mechanisms and is not a real-network causal finding.
+7. **Held-out consistency is limited evidence.** Agreement between training and test supports
+   reproducibility within the simulator but does not establish external validity.
+
+**Limitations specific to Experiment 2**
+- The threshold rule (99th percentile), the persistence values and the 5-minute clear-delay
+  shape the absolute numbers; the comparisons between detectors are the focus.
+- False-alarm rates depend on the simulated burst model.
+- Burst attribution was not possible without modifying the generator.
+- Onset is a modelling convention: delays are measured from a point where the physical
+  signal is still negligible.
+- There is no cost model weighing missed detections against false alarms.
+- Only one held-out split was evaluated.
+
 ## Change log
 
 | Date | Change | Reason |
@@ -738,3 +848,4 @@ trade-off holds on held-out episodes is the question for Phase 2.
 | 2026-10-08 | Added Experiment 1 observed results, comparison with pre-recorded expectations and interpretation | Results reviewed; mismatches preserved as findings; no parameter, threshold or calculation changed |
 | 2026-10-08 | Added the Experiment 2 method, alarm-event and evaluation definitions, and expectations recorded before running | Engineering baseline specified before any detector was run |
 | 2026-10-08 | Added Experiment 2 Phase 1 training results and frozen specification (section 12.7) | Recorded before any held-out evaluation; no detector parameter changed |
+| 2026-10-08 | Added Experiment 2 Phase 2 held-out results (12.8) and interpretation and limitations (12.9); clarified the Figure 6 selection rule operationally | Single held-out evaluation of the specification frozen at ddd57ca; no detector, threshold or metric changed |
