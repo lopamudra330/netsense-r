@@ -1,0 +1,82 @@
+{
+  "description": "Frozen Experiment 2 engineering detector specification (Phase 1). Everything needed to apply the detector without recomputing anything.",
+  "frozen_on": "2026-10-08",
+  "inputs": {
+    "indicators": [
+      "latency_ms",
+      "jitter_ms",
+      "error_rate_pct",
+      "retransmission_rate_pct"
+    ],
+    "observation_order": "minutes ordered by (seed, episode_id, minute); each episode independent",
+    "excluded_from_detection": [
+      "packet_loss_pct",
+      "throughput_mbps",
+      "connection_state",
+      "state",
+      "hidden_severity",
+      "cause",
+      "episode_type"
+    ],
+    "missing_values": "a missing value or missing minute counts as not suspicious"
+  },
+  "per_minute_condition": {
+    "combination": "OR: a minute is suspicious if ANY indicator exceeds its threshold",
+    "comparison": "strict: value > threshold (a value equal to the threshold is not suspicious)",
+    "thresholds": {
+      "latency_ms": 47.72811648979762,
+      "jitter_ms": 24.3135147987951,
+      "error_rate_pct": 0.3027426310045134,
+      "retransmission_rate_pct": 0.28278915510498637
+    },
+    "threshold_rule": "99th percentile of NORMAL minutes in the training episodes of all seeds pooled; a pre-declared empirical engineering threshold from healthy training telemetry, not a telecommunications alarm standard"
+  },
+  "persistence_rule": "rule satisfied at minute t if at least k of the minutes t-w+1..t are suspicious (fewer than w minutes are available at the start of an episode); counters reset at the start of every episode",
+  "detectors": {
+    "A_single_minute": {
+      "k": 1,
+      "w": 1
+    },
+    "B_3_consecutive": {
+      "k": 3,
+      "w": 3
+    },
+    "C1_3_of_10": {
+      "k": 3,
+      "w": 10
+    },
+    "C2_6_of_20": {
+      "k": 6,
+      "w": 20
+    }
+  },
+  "alarm_events": {
+    "start": "first minute the rule is satisfied while no alarm is active",
+    "continuation": "the event continues while the rule is satisfied, and also if the rule is satisfied again before closure is confirmed",
+    "clear_minutes": 5,
+    "closure_confirmation": "causal: confirmed on the clear_minutes-th consecutive minute in which the rule is not satisfied; no future observation is ever used",
+    "effective_end": "last minute in which the rule was satisfied (retrospective description)",
+    "online_span": "from start to closure confirmation (or episode end if never confirmed)",
+    "episode_end": "an event still open at the end of an episode is closed there, unconfirmed",
+    "counting": "one continuous alarm is one event; an episode may contain several events"
+  },
+  "training": {
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "split": "frozen episode-level split (netsense/splits.py), seed + 2000",
+    "episodes": 650,
+    "normal_rows_for_thresholds": 141174
+  },
+  "reproducibility": {
+    "command": "python -m experiments.e2_threshold_baseline freeze",
+    "generator_sha256": "4f7a7e90b6f10c40780e2a50c951feeafcbf025d82f9cdb61868d98faeaa1faa",
+    "python": "3.13.16",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6"
+  }
+}

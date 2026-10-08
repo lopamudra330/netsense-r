@@ -170,6 +170,25 @@ BASELINE_WINDOW_MIN = 60
 RISING_WINDOW_END_SEVERITY = RECOVERY_PEAK_RANGE[0]
 RISING_LEVEL_WINDOW_MIN = 10  # "level" = median of the last minutes of the rising window
 
+# --- Experiment 2: engineering monitoring baseline (fixed before any detector run) ---
+# Indicators of the cause-agnostic per-minute condition. Probe loss (1/600 resolution) and
+# throughput (high utilisation is not itself a fault) are deliberately excluded.
+DETECTOR_INDICATORS = ["latency_ms", "jitter_ms", "error_rate_pct", "retransmission_rate_pct"]
+INDICATOR_GROUPS = {"latency_ms": "delay", "jitter_ms": "delay",
+                    "error_rate_pct": "error", "retransmission_rate_pct": "error"}
+# Pre-declared empirical engineering threshold from healthy (NORMAL) training telemetry.
+# NOT an established telecommunications alarm standard.
+DETECTOR_THRESHOLD_PERCENTILE = 99
+# Persistence rules: alarm when at least K of the last W minutes are suspicious.
+DETECTORS = {
+    "A_single_minute": (1, 1),
+    "B_3_consecutive": (3, 3),
+    "C1_3_of_10": (3, 10),
+    "C2_6_of_20": (6, 20),
+}
+ALARM_CLEAR_MINUTES = 5  # closure confirmed on the 5th consecutive unsatisfied minute
+SEVERE_ENTRY_SEVERITY = STATE_BAND_EDGES[2]  # critical-degradation threshold (0.70)
+
 # --- Paths ------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GENERATED_DATA_DIR = PROJECT_ROOT / "data" / "generated"

@@ -515,6 +515,215 @@ for congestion includes utilisation that is not yet far outside the burst-widene
 range. Differences in normal load between links dominate throughput until link-quality
 degradation becomes severe.
 
+## 12. Experiment 2: engineering monitoring baseline (method and pre-recorded expectations)
+
+This section was written **before** any Experiment 2 detector was run. Results are added
+later in separate subsections; this text is not rewritten afterwards.
+
+### 12.1 Question
+
+> Can a transparent persistence-aware engineering detector improve degradation detection
+> and false-alarm control compared with single-minute threshold rules?
+
+This is a non-ML baseline. Its frozen specification is the benchmark that Experiment 3 must
+be compared against, on the same held-out episodes and with the same event-level metrics.
+It cannot show how the rules behave on real telemetry, that any persistence setting is
+optimal, or anything about prognosis.
+
+### 12.2 Detectors
+
+**Per-minute condition (cause-agnostic):** a minute is *suspicious* if **any** of latency,
+jitter, error rate or retransmission rate is strictly above its threshold.
+
+- Probe packet loss is excluded: about half of healthy minutes lose at least one of 600
+  probes, so low values are a resolution artefact (Experiment 1). The retransmission
+  counter measures the same phenomenon without that limit.
+- Throughput is excluded: high utilisation is not in itself a fault, and harmless bursts
+  drive it.
+
+**Thresholds:** the **99th percentile of NORMAL minutes in the training episodes of all five
+seeds pooled**, one value per indicator, upper side only. This is a pre-declared empirical
+engineering threshold derived from healthy training telemetry. **It is not an established
+telecommunications alarm standard.** Thresholds are absolute rather than baseline-relative,
+because per-link normalisation did not help in Experiment 1. Per-seed values are reported
+for stability only and are never used.
+
+**Persistence rules**, all expressed as "at least K of the last W minutes suspicious":
+
+| Detector | K of W | Meaning |
+|---|---|---|
+| A | 1 of 1 | Single minute (reactive reference) |
+| B | 3 of 3 | 3 consecutive minutes |
+| C1 | 3 of 10 | 3 of the last 10 minutes; gaps tolerated |
+| C2 | 6 of 20 | 6 of the last 20 minutes; same density as C1, longer memory |
+
+A → B isolates persistence, B → C1 isolates gap tolerance (K = 3 in both), and C1 → C2
+isolates window length (30% density in both). Only data up to the current minute is used.
+Counters reset at the start of every episode.
+
+**Post-detection diagnostic signature (reporting only):** the indicator group suspicious at
+the start minute of an episode's first valid detection. *Delay* means latency or jitter;
+*error* means error rate or retransmission rate.
+
+### 12.3 Alarm events (identical for all detectors)
+
+- An alarm **starts** at the first minute the detector's rule is satisfied while no alarm is
+  active.
+- It stays active while the rule is satisfied. If the rule becomes satisfied again before
+  closure is confirmed, the event continues; there is no new event.
+- **Causal clearing:** closure is **confirmed** only on the 5th consecutive minute in which
+  the rule is not satisfied. The monitor never uses future observations to close earlier.
+  Two times are recorded:
+  - *closure confirmation time*: the minute closure was confirmed online;
+  - *effective event end*: the last minute in which the rule was satisfied, a
+    retrospective description.
+- One continuous alarm is **one event**. An episode may have several events. An event still
+  open at the end of an episode is closed there (no confirmation time).
+- The alarm is shown **online** from its start to its confirmation time (or episode end).
+  Alarm burden and "alarm already active at onset" use this online span.
+
+### 12.4 Ground truth and metrics (evaluation only)
+
+Hidden labels never enter the detector.
+
+**Terms**
+- *Onset* is the generator's recorded `onset_minute`.
+- *Severe entry* is the first minute with hidden severity ≥ 0.70.
+- *Degrading phase:* from onset to episode end (worsening episodes), or to the last minute
+  with severity above 0 (recovering episodes).
+- *Healthy period:* every minute outside a degrading phase (all of every stable episode,
+  the pre-onset part of every degrading episode, and the post-recovery part of recovering
+  episodes).
+
+**Implementation clarification, decided before running:** inside a degrading phase,
+severity can be clipped to exactly 0 for a moment by the random wobble. Such minutes belong
+to the degrading phase, not to healthy time. This implements the existing rule
+(section 8) that alarms after onset are detections and are not counted as false alarms
+while ground truth is ambiguous.
+
+**Alarm events are classified by their start minute:**
+- start in a healthy period → **false alarm**;
+- start inside a degrading phase → **valid detection**.
+
+An alarm that began before onset is a false alarm and never receives early-detection
+credit.
+
+**Episode outcomes (degrading episodes):**
+1. *valid post-onset detection*: an event starts inside the degrading phase;
+2. *alarm already active at onset*: no such event, but an alarm that started before onset
+   was still active (online) at onset;
+3. *no valid degradation alarm*.
+
+The share of all degrading episodes with an alarm active at onset is also reported as
+context. Detection rate and delay use outcome 1 only.
+
+**Metrics:**
+- detection rate (worsening, recovering), with the three outcome shares;
+- false alarms per 100 healthy hours;
+- healthy alarm burden (% of healthy minutes under an online alarm);
+- detection delay (first valid detection − onset; median and 25th–75th percentile);
+- % of worsening episodes warned before severe entry;
+- severe lead time (severe entry − first valid detection; median and 25th–75th percentile;
+  negative values kept).
+
+### 12.5 Protocol
+
+- **Phase 1 (freeze), training episodes only:** test episodes are dropped immediately
+  after generation, using only episode metadata (id, type, cause), before any telemetry
+  value is validated, summarised or used. Then: compute thresholds, run all four detectors
+  on training episodes, and write the frozen specification
+  `results/metrics/e2_detector_spec.json`. The specification is committed before Phase 2.
+- **Phase 2 (evaluate), held-out test episodes, once:** load the committed specification
+  without recomputing anything. Any change after Phase 2 becomes a separately named new
+  experiment.
+- Episodes are identified by (seed, episode_id). Results are reported pooled and per seed.
+- **Burst attribution** of false alarms was planned only if it needed no change to the
+  frozen generator. The generator does not store burst timing, and recovering it would mean
+  intercepting the generator's internal functions at run time. That is treated as a
+  modification, so burst attribution is **not performed**.
+- **Terminology:** "error rate" refers to the `error_rate_pct` telemetry column.
+
+### 12.6 Expectations recorded before running
+
+| Item | Expectation |
+|---|---|
+| A (single minute) | Highest false-alarm rate (four indicators at about 1% each, plus bursts); shortest delay; highest detection rates |
+| B (3 consecutive) | Clearly fewer false alarms than A, but harmless bursts of 3–10 minutes still trigger it; noticeably later detection; often misses EARLY degradation because exceedances are scattered, so detection happens mostly in DEGRADED |
+| C1 (3 of 10) | False alarms between A and B; earlier detection than B because gaps are tolerated |
+| C2 (6 of 20) | Fewest false alarms; longest delay |
+| Worsening episodes | Close to 100% detected by every detector eventually; differences lie in delay |
+| Recovering episodes | Lower detection rate than worsening, especially low-peak episodes, and lowest for C2 |
+| Cause | Link-quality degradation detected earlier than congestion |
+| Before severe | Most worsening episodes warned before severe entry; lead time shrinks as persistence increases |
+| Overall | No detector achieves both low false alarms and early detection; persistence trades false alarms for delay, by an amount not known in advance |
+| Diagnostic signature | Congestion first flagged by delay indicators; link quality by error indicators |
+| Training vs test | Similar, because no performance-based tuning is done |
+
+### 12.7 Phase 1: training results and frozen specification
+
+*Added after Phase 1. Sections 12.1–12.6, including the pre-recorded expectations in 12.6,
+are unchanged. These are **training results only** and provide **no evidence yet about
+held-out generalisation**.*
+
+**Frozen specification:** [`results/metrics/e2_detector_spec.json`](../results/metrics/e2_detector_spec.json).
+The thresholds are the 99th percentile of 141,174 NORMAL training minutes (650 training
+episodes, five seeds pooled):
+
+| Indicator | Threshold | Per-seed range (stability only, not used) |
+|---|---|---|
+| Latency | 47.73 ms | 46.25–50.30 |
+| Jitter | 24.31 ms | 22.58–26.43 |
+| Error rate | 0.3027% | 0.2295–0.3864 |
+| Retransmission rate | 0.2828% | 0.2435–0.3240 |
+
+2.13% of healthy training minutes are suspicious under the four-indicator OR. Healthy
+suspicious minutes come in runs: 46% of runs last 1 minute, 20% last 2, 12% last 3, and 22%
+last 4 minutes or more.
+
+**Training results** (pooled; `results/metrics/e2_results_train*.csv`):
+
+| Metric | A (1 of 1) | B (3 of 3) | C1 (3 of 10) | C2 (6 of 20) |
+|---|---|---|---|---|
+| Detection rate, worsening | 100% | 100% | 100% | 100% |
+| Detection rate, recovering | 88.0% | 78.0% | 80.7% | 72.7% |
+| False alarms per 100 healthy h | 42.1 | 17.8 | 21.3 | 4.9 |
+| Healthy alarm burden | 5.9% | 2.2% | 5.0% | 1.6% |
+| Median delay, min (25th–75th) | 36 (23–50) | 46 (33–62) | 43 (29–59) | 51 (39–66) |
+| Warned before severe | 100% | 99.3% | 100% | 98.0% |
+| Median severe lead, min (25th–75th) | 40.5 (28–60) | 31 (17–48) | 34 (22–52) | 26 (16–41) |
+| Alarm active at onset (any) | 4.0% | 1.3% | 4.9% | 0.9% |
+
+**Phase 1 findings (training data):**
+- All four detectors eventually detected 100% of worsening training episodes.
+- Persistence substantially reduced false-alarm events but increased detection delay.
+- B substantially reduced false alarms relative to A (−58%) at about 10 minutes more median
+  delay.
+- C1 gained only modest detection speed over B (3 minutes) while increasing false alarms and
+  healthy alarm burden. Once triggered, its 10-minute memory keeps alarms on longer.
+- C2 produced the lowest false-alarm rate but the longest delay and the lowest
+  recovering-episode detection.
+- Persistence did not eliminate false alarms. Healthy suspicious observations occur in
+  clusters and runs (harmless bursts), not only as isolated minutes.
+- Recovering degradation was harder to detect than worsening degradation.
+- Link-quality degradation was detected earlier than congestion, and congestion gave
+  shorter severe lead times under persistence.
+- Diagnostic first-trigger signatures broadly matched the simulated mechanisms:
+  link-quality alarms began from error indicators in 89–94% of detected episodes, and
+  congestion alarms mostly from delay indicators, often together with others.
+- **Detector A's apparent early advantage must be interpreted cautiously.** About 12% of its
+  first valid detections in worsening episodes occurred while severity was still below 0.10,
+  shortly after onset. Some of these may be coincidental healthy-like exceedances that the
+  pre-declared rule credits as detections.
+- Alarm-already-active-at-onset cases were rare: 0.9–4.9% of degrading episodes, and only
+  one episode (detector A) without a later valid detection.
+- Burst attribution was not performed because it would have required modifying the
+  frozen generator.
+
+**Interpretation.** No detector is declared universally "best". The results describe an
+engineering trade-off between four things: false-alarm suppression, detection delay,
+sensitivity to recovering degradation, and severe-degradation lead time. Whether this
+trade-off holds on held-out episodes is the question for Phase 2.
+
 ## Change log
 
 | Date | Change | Reason |
@@ -527,3 +736,5 @@ degradation becomes severe.
 | 2026-10-08 | Added the Telemetry Integrity & Validation Layer, deterministic defect injection into a copy, and manifest-based evaluation; recorded two simulator simplifications exposed by validation | Telemetry must be validated before detector development; the generator itself is unchanged |
 | 2026-10-08 | Added the frozen episode-level train/test split and the Experiment 1 method with expectations recorded before running | Exploratory analysis restricted to training episodes so that it cannot influence decisions about test data |
 | 2026-10-08 | Added Experiment 1 observed results, comparison with pre-recorded expectations and interpretation | Results reviewed; mismatches preserved as findings; no parameter, threshold or calculation changed |
+| 2026-10-08 | Added the Experiment 2 method, alarm-event and evaluation definitions, and expectations recorded before running | Engineering baseline specified before any detector was run |
+| 2026-10-08 | Added Experiment 2 Phase 1 training results and frozen specification (section 12.7) | Recorded before any held-out evaluation; no detector parameter changed |
