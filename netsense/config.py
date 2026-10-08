@@ -194,3 +194,14 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GENERATED_DATA_DIR = PROJECT_ROOT / "data" / "generated"
 FIGURES_DIR = PROJECT_ROOT / "results" / "figures"
 METRICS_DIR = PROJECT_ROOT / "results" / "metrics"
+
+# --- Experiment 3: interpretable ML detector (fixed before any model was fitted) ---
+ML_INDICATORS = DETECTOR_INDICATORS          # same four indicators as Experiment 2
+ML_LOG_INDICATORS = ["error_rate_pct", "retransmission_rate_pct"]
+ML_LOG_OFFSET = 0.001                        # log10(value + offset), percentage points
+ML_WINDOW_MIN = 10                           # 10-minute mean; trend = last 5 vs previous 5
+ML_TREND_HALF_MIN = 5
+ML_MAX_ITER = 1000                           # LogisticRegression defaults otherwise
+# Target healthy-minute trigger rate: the frozen engineering condition on healthy training
+# minutes (Experiment 2 Phase 1: 2,834 of 133,361).
+ML_TARGET_HEALTHY_RATE = 2834 / 133361

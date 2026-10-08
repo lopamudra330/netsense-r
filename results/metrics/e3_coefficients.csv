@@ -1,0 +1,17 @@
+feature,indicator,kind,standardised_coefficient,sign,odds_ratio_per_sd,pr_auc_without_group,pr_auc_change
+latency_ms__current,latency_ms,current,-0.633865728938648,-,0.5305369198350514,,
+latency_ms__mean10,latency_ms,mean10,-0.072359552909713,-,0.9301963808615545,,
+latency_ms__trend5,latency_ms,trend5,-0.15711180654164783,-,0.8546085026547379,,
+jitter_ms__current,jitter_ms,current,1.3883013681218157,+,4.008036089554203,,
+jitter_ms__mean10,jitter_ms,mean10,2.4039745659247154,+,11.067075904852059,,
+jitter_ms__trend5,jitter_ms,trend5,0.06278879816255352,+,1.0648019273576665,,
+error_rate_pct__current,error_rate_pct,current,0.7454783205270996,+,2.1074492301635583,,
+error_rate_pct__mean10,error_rate_pct,mean10,4.344344999420921,+,77.04155868373567,,
+error_rate_pct__trend5,error_rate_pct,trend5,0.014638306137122902,+,1.0147459708419055,,
+retransmission_rate_pct__current,retransmission_rate_pct,current,0.24720336839401155,+,1.2804394872235518,,
+retransmission_rate_pct__mean10,retransmission_rate_pct,mean10,-0.2682065694302588,-,0.7647497908568605,,
+retransmission_rate_pct__trend5,retransmission_rate_pct,trend5,-0.026472946973788544,-,0.9738743897285573,,
+drop_group:latency_ms,latency_ms,sensitivity,,,,0.9633332595562111,-0.00041548452751249965
+drop_group:jitter_ms,jitter_ms,sensitivity,,,,0.944764376583859,-0.01898436749986454
+drop_group:error_rate_pct,error_rate_pct,sensitivity,,,,0.9572414379036182,-0.006507306180105421
+drop_group:retransmission_rate_pct,retransmission_rate_pct,sensitivity,,,,0.9637446506983818,-4.093385341796818e-06

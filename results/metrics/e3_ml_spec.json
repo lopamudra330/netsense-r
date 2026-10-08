@@ -1,0 +1,172 @@
+{
+  "description": "Frozen Experiment 3 interpretable ML detector specification (Phase 1).",
+  "frozen_on": "2026-10-08",
+  "score": "logistic model score (predicted probability under the fitted logistic model); probability calibration is not performed",
+  "inputs": {
+    "indicators": [
+      "latency_ms",
+      "jitter_ms",
+      "error_rate_pct",
+      "retransmission_rate_pct"
+    ],
+    "excluded": [
+      "packet_loss_pct",
+      "throughput_mbps",
+      "connection_state",
+      "state",
+      "hidden_severity",
+      "cause",
+      "episode_type",
+      "episode_id",
+      "timestamp"
+    ]
+  },
+  "transform": {
+    "log10_plus_offset": [
+      "error_rate_pct",
+      "retransmission_rate_pct"
+    ],
+    "offset": 0.001
+  },
+  "features": {
+    "names": [
+      "latency_ms__current",
+      "latency_ms__mean10",
+      "latency_ms__trend5",
+      "jitter_ms__current",
+      "jitter_ms__mean10",
+      "jitter_ms__trend5",
+      "error_rate_pct__current",
+      "error_rate_pct__mean10",
+      "error_rate_pct__trend5",
+      "retransmission_rate_pct__current",
+      "retransmission_rate_pct__mean10",
+      "retransmission_rate_pct__trend5"
+    ],
+    "current": "x(t)",
+    "mean10": "mean of x(t-9..t)",
+    "trend5": "mean(x(t-4..t)) - mean(x(t-9..t-5))",
+    "scope": "within each (seed, episode_id) on the full minute index; causal",
+    "undefined": "if any of minutes t-9..t is missing for any indicator (gap or warm-up minutes 0-8), all features at t are undefined; such minutes are excluded from fitting and are not suspicious"
+  },
+  "target": {
+    "1": "inside degrading phase with hidden state EARLY/DEGRADED/SEVERE",
+    "0": "healthy minute outside the degrading phase",
+    "excluded": "inside degrading phase with hidden state NORMAL (severity < 0.10)"
+  },
+  "model": {
+    "type": "sklearn LogisticRegression, library defaults (L2, C=1.0, lbfgs)",
+    "max_iter": 1000,
+    "class_weight": null,
+    "standardisation": "population mean/std of training fitting rows",
+    "features": [
+      "latency_ms__current",
+      "latency_ms__mean10",
+      "latency_ms__trend5",
+      "jitter_ms__current",
+      "jitter_ms__mean10",
+      "jitter_ms__trend5",
+      "error_rate_pct__current",
+      "error_rate_pct__mean10",
+      "error_rate_pct__trend5",
+      "retransmission_rate_pct__current",
+      "retransmission_rate_pct__mean10",
+      "retransmission_rate_pct__trend5"
+    ],
+    "scaler_mean": [
+      32.727153930835115,
+      32.53697134243242,
+      0.2144449621661819,
+      9.10428740417263,
+      8.990617303541288,
+      0.12891009998420574,
+      -1.3249107300898546,
+      -1.335154391877048,
+      0.011692188315119695,
+      -0.3611688736943591,
+      -0.375034775779485,
+      0.015502481346028042
+    ],
+    "scaler_std": [
+      21.187147569041166,
+      20.53209911958807,
+      5.181276868532469,
+      11.618912782971325,
+      11.201030913074964,
+      3.2776195953377507,
+      1.191423986901425,
+      1.1654695196302107,
+      0.18846759544819566,
+      0.9707018652208823,
+      0.9485505711269976,
+      0.1634027980768419
+    ],
+    "coefficients": [
+      -0.633865728938648,
+      -0.072359552909713,
+      -0.15711180654164783,
+      1.3883013681218157,
+      2.4039745659247154,
+      0.06278879816255352,
+      0.7454783205270996,
+      4.344344999420921,
+      0.014638306137122902,
+      0.24720336839401155,
+      -0.2682065694302588,
+      -0.026472946973788544
+    ],
+    "intercept": 1.3235252719737085
+  },
+  "threshold": {
+    "tau": 0.6447583878236622,
+    "comparison": "suspicious if score > tau (strict)",
+    "target_healthy_rate": 0.02125059050247074,
+    "achieved_healthy_rate": 0.021253068362729444,
+    "rule": "distinct healthy-training score s whose share of healthy scores strictly above s is closest to the target; equally close -> larger s"
+  },
+  "persistence": {
+    "ML_A_single_minute": {
+      "k": 1,
+      "w": 1
+    },
+    "ML_B_3_consecutive": {
+      "k": 3,
+      "w": 3
+    },
+    "ML_C1_3_of_10": {
+      "k": 3,
+      "w": 10
+    },
+    "ML_C2_6_of_20": {
+      "k": 6,
+      "w": 20
+    }
+  },
+  "alarm_events": "Experiment 2 frozen rule_satisfied/alarm_events/evaluation, clear_minutes = 5",
+  "training": {
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "training_episodes": 650,
+    "training_rows": 234000,
+    "fitting_rows": 220337,
+    "healthy_fitting_rows": 127511,
+    "positive_fitting_rows": 92826,
+    "excluded_warmup_rows": 5850,
+    "excluded_undefined_other_rows": 0,
+    "excluded_post_onset_low_severity_rows": 7813
+  },
+  "reproducibility": {
+    "command": "python -m experiments.e3_ml_detector freeze",
+    "generator_sha256": "4f7a7e90b6f10c40780e2a50c951feeafcbf025d82f9cdb61868d98faeaa1faa",
+    "e2_spec_sha256": "8f3eeb07c5dc33963fddc7b7b03230d81b417b1c924fa1daf58f7587e9b31cf7",
+    "python": "3.13.16",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scikit_learn": "1.9.1"
+  }
+}

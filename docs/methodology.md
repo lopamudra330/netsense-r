@@ -834,6 +834,243 @@ All findings describe the frozen synthetic environment.
 - There is no cost model weighing missed detections against false alarms.
 - Only one held-out split was evaluated.
 
+## 13. Experiment 3: interpretable ML detector (method and pre-recorded expectations)
+
+This section was written **before** any Experiment 3 model was fitted. Results are added
+later in separate subsections; this text is not rewritten afterwards.
+
+### 13.1 Question
+
+> Can an interpretable ML detector use combinations and recent temporal patterns in
+> observable telemetry to improve the false-alarm vs detection-delay trade-off beyond the
+> frozen persistence-aware engineering baseline?
+
+The primary comparison is against the frozen Experiment 2 detectors, using the same
+event-level metrics. Classification scores are secondary diagnostics.
+
+### 13.2 Inputs and target
+
+**Inputs.** The same four indicators as Experiment 2: latency, jitter, error rate and
+retransmission rate. Probe packet loss and throughput are excluded, so that any difference
+from Experiment 2 comes from how the signals are combined over time, not from extra
+information.
+
+**Fixed transform:** error rate and retransmission rate become `log10(value + 0.001)`.
+Latency and jitter keep their natural scale.
+
+**Twelve causal features** (3 per indicator), computed within each episode, keyed by
+(seed, episode_id), on the full minute index:
+
+| Feature | Definition at minute t |
+|---|---|
+| Current | x(t) |
+| 10-minute mean | mean of x(t−9 … t) |
+| 5-minute trend | mean(x(t−4 … t)) − mean(x(t−9 … t−5)) |
+
+- **Causality:** only minutes up to *t* are used.
+- **Gaps:** if any of the 10 minutes t−9 … t is missing for any indicator, all 12 features
+  at *t* are undefined. Nothing bridges a gap.
+- **Warm-up:** minutes 0–8 of each episode are therefore undefined.
+- **Undefined features:** the minute is excluded from fitting and treated as *not
+  suspicious* when alarms are produced.
+
+**Target (training labels only; never a feature):**
+- **0** = healthy minute, outside the degrading phase (section 12.4);
+- **1** = inside the degrading phase with hidden state EARLY_DEGRADATION, DEGRADED or
+  SEVERE_DEGRADATION;
+- **excluded** = inside the degrading phase with hidden severity below 0.10 (labelled
+  NORMAL), because the ground truth is ambiguous.
+
+This is a *detection* target: it describes the link at minute *t* only, never the episode's
+future outcome.
+
+### 13.3 Model, preprocessing and score
+
+- scikit-learn `LogisticRegression` with library defaults (L2 penalty, C = 1.0, lbfgs
+  solver), `max_iter = 1000`. No class weighting, no hyperparameter search, no feature
+  selection, no comparator model.
+- Features are standardised with the mean and standard deviation (population form) of the
+  **training fitting rows only**.
+- The output is called the **logistic model score**, or the predicted probability under the
+  fitted logistic model. **Probability calibration is not performed;** the score is not a
+  calibrated probability of degradation.
+- The fitted scaler, coefficients and intercept are stored as numbers in
+  `e3_ml_spec.json`. Scores are reconstructed from that file, without refitting.
+
+### 13.4 Threshold τ (training-only, deterministic)
+
+**Target rate:** the share of healthy training minutes that the frozen engineering
+per-minute condition flags: 2,834 of 133,361 = 2.125% (Experiment 2, Phase 1).
+
+**Construction:**
+1. Take the scores of all healthy training fitting rows.
+2. For each distinct score value *s*, compute the share of those rows with score > *s*.
+3. τ is the *s* whose share is closest to the target rate. If two values are equally
+   close, choose the larger *s* (fewer alarms).
+4. A minute is suspicious when **score > τ** (strict, matching Experiment 2).
+
+Because ties in scores are possible, exact equality with the target is not claimed. The
+achieved rate is reported. No alternative threshold is evaluated against detection
+performance.
+
+### 13.5 Persistence and alarms
+
+The suspicious-minute sequence is passed unchanged through Experiment 2's frozen
+`rule_satisfied` and `alarm_events` functions, with the same four rules (ML-A 1 of 1,
+ML-B 3 of 3, ML-C1 3 of 10, ML-C2 6 of 20) and the 5-minute causal clear-delay. It is then
+evaluated with the frozen `evaluation.py`.
+
+Each ML variant is compared descriptively with its engineering counterpart. The ML features
+already contain 10-minute smoothing, so ML plus persistence smooths twice.
+
+### 13.6 Interpretability and diagnostics
+
+- **Coefficients:** standardised coefficients, their signs, and odds ratios per standard
+  deviation, reported descriptively and **not causally**. Current value, 10-minute mean
+  and trend of the same indicator are correlated, so coefficient magnitudes and signs can
+  redistribute across related predictors.
+- **Leave-one-indicator-group-out sensitivity diagnostic:** for each indicator, the model is
+  refitted without that indicator's three features, and the change in training PR-AUC is
+  reported. This is a training sensitivity diagnostic, not proof of independent feature
+  importance, and it never changes the final model.
+- **Per-minute diagnostics:** PR-AUC, ROC-AUC, precision, recall and F1 at τ, and the share
+  of healthy, EARLY, DEGRADED and SEVERE minutes flagged by the ML condition and by the
+  frozen engineering condition, on the same rows.
+
+### 13.7 Protocol
+
+- **Phase 1:** training episodes only (test episodes dropped after generation using episode
+  metadata only). Fit, derive τ, run the four ML variants on training episodes, write
+  `e3_ml_spec.json`, then review and commit.
+- **Phase 2:** load the committed specification and evaluate the held-out episodes once, with
+  no refitting or tuning. A genuine bug found after test exposure means stopping and
+  reporting it, not a silent rerun.
+
+### 13.8 Expectations recorded before running
+
+| Item | Expectation |
+|---|---|
+| Per-minute EARLY hit rate at the matched healthy rate | ML higher than the engineering condition, because 10-minute means average out the noise that hides small shifts |
+| ML-A vs Eng-A | ML-A has far fewer false-alarm events (its signal is already smoothed), with similar or slightly longer delay |
+| ML-B/C1/C2 vs Eng-B/C1/C2 | Smaller gains; engineering persistence already captures much of what the rolling features add, and may be hard to beat |
+| Trade-off frontier | At least one ML variant at or slightly inside the engineering frontier, but this is not certain |
+| Recovering episodes | Still harder to detect than worsening episodes |
+| Congestion | Still detected later than link-quality degradation |
+| Coefficients | Error-rate and retransmission features large and positive; jitter and latency 10-minute means positive; some signs within a correlated group may be counter-intuitive |
+| Harmless bursts | Still cause some ML false alarms; 10-minute means dilute short bursts but not long ones |
+| Training vs test | Similar |
+
+If ML does no better than the engineering rules, or worse, that is reported as the finding.
+
+### 13.9 Phase 1: training results
+
+*Added after Phase 1. Sections 13.1–13.8, including the pre-recorded expectations in 13.8,
+are unchanged.* **These are training (in-sample) results.** The model's 13 parameters were
+fitted to these same training episodes, whereas the engineering thresholds were derived from
+healthy training minutes only, without degradation labels. The comparison therefore favours
+ML and **does not establish held-out superiority.** None of the observations below caused any
+change to the model, features, transforms, windows, labels, threshold or persistence rules.
+
+**Data.**
+- 650 training episodes (234,000 rows).
+- 220,337 fitting rows: 127,511 healthy and 92,826 positive.
+- Excluded: 5,850 warm-up rows (minutes 0–8) and 7,813 post-onset rows with severity below
+  0.10.
+- No rows were excluded for gaps.
+
+**Threshold.**
+- Target healthy trigger rate: 2,834 / 133,361 = 2.1251%.
+- τ = 0.6447583878236622 (logistic model score; not a calibrated probability).
+- Achieved healthy trigger rate: 2.1253%.
+
+**Per-minute diagnostics** (training fitting rows; `e3_minute_diagnostics_train.csv`):
+
+| Metric | ML (score > τ) | Frozen engineering condition |
+|---|---|---|
+| PR-AUC / ROC-AUC | 0.964 / 0.962 | — |
+| Precision / recall / F1 | 0.966 / 0.821 / 0.888 | 0.962 / 0.736 / 0.834 |
+| Healthy trigger rate | 2.125% | 2.136% (same rows) |
+| EARLY_DEGRADATION hit rate | 34.7% | 10.0% |
+| DEGRADED hit rate | 87.6% | 72.1% |
+| SEVERE_DEGRADATION hit rate | 100% | 99.98% |
+
+**Event-level results** (training, pooled; `e3_results_train.csv`; engineering values from the
+committed `e2_results_train.csv`):
+
+| Metric | ML-A | Eng-A | ML-B | Eng-B | ML-C1 | Eng-C1 | ML-C2 | Eng-C2 |
+|---|---|---|---|---|---|---|---|---|
+| Detection, worsening | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% |
+| Detection, recovering | 89.3% | 88.0% | 86.7% | 78.0% | 87.3% | 80.7% | 86.0% | 72.7% |
+| False alarms / 100 h | 24.2 | 42.1 | 11.5 | 17.8 | 12.1 | 21.3 | 8.6 | 4.9 |
+| Healthy alarm burden | 4.2% | 5.9% | 2.2% | 2.2% | 3.8% | 5.0% | 3.6% | 1.6% |
+| Median delay, min (25th–75th) | 32 (21–43) | 36 (23–50) | 37 (24–49) | 46 (33–62) | 36 (24–48) | 43 (29–59) | 40 (27–52) | 51 (39–66) |
+| Warned before severe | 100% | 100% | 100% | 99.3% | 100% | 100% | 98.7% | 98.0% |
+| Median severe lead, min (25th–75th) | 46 (32–64) | 40.5 (28–60) | 40.5 (26–60) | 31 (17–48) | 41 (27–61) | 34 (22–52) | 37 (22–57) | 26 (16–41) |
+| No valid degradation alarm | 3.6% | 3.8% | 4.4% | 7.3% | 4.2% | 6.4% | 4.7% | 9.1% |
+
+No ML variant had an "alarm already active at onset" outcome.
+
+**Per-seed ranges (ML, training):**
+
+| Detector | False alarms / 100 h | Median delay (min) | Recovering detection |
+|---|---|---|---|
+| ML-A | 22.4–29.2 | 29–33 | 83–93% |
+| ML-B | 8.5–15.2 | 36–37 | 77–93% |
+| ML-C1 | 9.6–15.4 | 35–37 | 80–93% |
+| ML-C2 | 6.0–11.4 | 39–41 | 77–93% |
+
+**Findings (training only):**
+- **ML-A, ML-B and ML-C1 outperformed their engineering counterparts on both training false
+  alarms and delay.**
+- **ML-C2 was faster but noisier than Eng-C2:** 11 minutes earlier, but 8.6 vs 4.9 false
+  alarms per 100 h and 3.6% vs 1.6% healthy burden.
+- At an almost equal healthy trigger rate, ML flagged about 3.5 times as many EARLY minutes
+  as the engineering condition.
+- **Recovering degradation remained harder** to detect than worsening degradation (86–89%
+  vs 100%).
+- **Congestion remained later than link quality:** median delay 40–49 vs 27–33 minutes.
+  Link-quality recovering episodes were all detected (100%); congestion recovering
+  episodes 72–79%.
+
+**Coefficients** (standardised; descriptive, not causal; `e3_coefficients.csv`, Figure 8):
+- The largest are error-rate 10-minute mean (+4.34; odds ratio per SD 77), jitter
+  10-minute mean (+2.40) and jitter current (+1.39).
+- **All three latency coefficients are negative** (current −0.63, mean −0.07, trend −0.16).
+- **The retransmission 10-minute mean coefficient is negative** (−0.27).
+- The current value, 10-minute mean and trend of the same indicator are correlated, so
+  coefficient magnitudes and signs can redistribute across related predictors. These signs
+  do not describe physical effects.
+
+**Leave-one-indicator-group-out sensitivity diagnostic** (change in training PR-AUC from
+0.9637): latency −0.00042, jitter −0.0190, error rate −0.0065, retransmission −0.0000041.
+Removing the latency or retransmission feature groups produced negligible change in training
+PR-AUC, suggesting substantial redundancy with the remaining features within this fitted
+simulator model. This is a training-only sensitivity diagnostic and does not establish
+independent feature importance.
+
+**Comparison with the pre-recorded expectations (13.8):**
+
+| Expectation | Training result | Verdict |
+|---|---|---|
+| Higher EARLY hit rate than engineering | 34.7% vs 10.0% | Matches, more strongly than expected |
+| ML-A far fewer false alarms, similar or slightly longer delay | −43% false alarms, 4 minutes *shorter* delay | Partly: better than expected on delay |
+| ML-B/C1/C2 smaller gains; persistence hard to beat | B and C1 large gains in false alarms and delay; C2 faster but noisier than Eng-C2 | Does not match |
+| At least one ML variant at or near the frontier | Three variants clearly inside it on training | Matches, more strongly than expected |
+| Recovering still harder | Yes | Matches |
+| Congestion later | Yes | Matches |
+| Error and retransmission positive; jitter and latency means positive | Error-rate mean and jitter positive; retransmission mean and all latency coefficients negative | Partly |
+| Bursts still cause false alarms | Yes | Matches |
+
+**Surprises:**
+1. The improvement over the engineering detectors was larger than the pre-recorded
+   expectations.
+2. ML-C2 produced more false alarms than Eng-C2. A possible but unverified explanation:
+   the 10-minute mean keeps the score above τ for several minutes after a burst.
+3. The latency coefficients are negative. This is unexplained; it may reflect redistribution
+   among correlated predictors or differences in baseline delay between links. It is not
+   verified and not causal.
+4. The latency and retransmission groups were nearly redundant in the sensitivity diagnostic.
+
 ## Change log
 
 | Date | Change | Reason |
@@ -849,3 +1086,5 @@ All findings describe the frozen synthetic environment.
 | 2026-10-08 | Added the Experiment 2 method, alarm-event and evaluation definitions, and expectations recorded before running | Engineering baseline specified before any detector was run |
 | 2026-10-08 | Added Experiment 2 Phase 1 training results and frozen specification (section 12.7) | Recorded before any held-out evaluation; no detector parameter changed |
 | 2026-10-08 | Added Experiment 2 Phase 2 held-out results (12.8) and interpretation and limitations (12.9); clarified the Figure 6 selection rule operationally | Single held-out evaluation of the specification frozen at ddd57ca; no detector, threshold or metric changed |
+| 2026-10-08 | Added the Experiment 3 method, threshold construction and expectations recorded before running | Interpretable ML detector specified before any model was fitted |
+| 2026-10-08 | Added Experiment 3 Phase 1 training results (13.9) and froze the ML specification | Training-only, in-sample results; no model, feature, threshold or rule changed |
